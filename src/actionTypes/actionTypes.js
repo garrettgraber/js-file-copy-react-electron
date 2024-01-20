@@ -1,0 +1,3 @@
+export const ADD_COPY_ITEM = 'ADD_COPY_ITEM';
+export const DELETE_COPY_ITEM = 'DELETE_COPY_ITEM';
+export const EMPTY_COPY_ITEMS = 'EMPTY_COPY_ITEMS';
