@@ -21,6 +21,9 @@ const getSourceFolderContents = folderPath => {
 const getTargetFolderContents = folderPath => {
   api.send(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, { folderPath });
 };
+const createFolder = (currentFolder, newFolder) => {
+	api.send(ComObject.channels.CREATE_FOLDER, {currentFolder, newFolder});
+};
 
 const ApiBase = {
 	getRootFolder,
@@ -28,7 +31,8 @@ const ApiBase = {
 	getMediaDrives,
 	getHomeFolder,
 	getSourceFolderContents,
-	getTargetFolderContents
+	getTargetFolderContents,
+	createFolder
 };
 
 export default ApiBase;

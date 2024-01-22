@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Box, Tabs, Tab } from '@mui/material';
+import { TabContext, TabPanel, TabList } from '@mui/lab';
+import { ThemeProvider, createTheme, ThemeOptions, styled } from '@mui/material/styles';
 
 import ComObject from './api/COM.js';
 import ApiBase from './api/apiBase.js';
-
 
 import logo from './logo.svg';
 import './App.css';
@@ -11,14 +13,10 @@ import CopyPane from './components/CopyPane.js';
 import SourcePane from './components/SourcePane.js';
 import TargetPane from './components/TargetPane.js';
 
-
 const { api } = window;
 
-console.log('api: ', api);
-
-
 const SOURCE = 'Source Folders and Files';
-const TARGET = 'Destination Folders and Files';
+const TARGET = 'Destination Folder';
 
 const isObjectEmpty = obj => Object.keys(obj).length === 0;
 const isArrayEmpty = arr => arr.length === 0;
@@ -30,6 +28,7 @@ ApiBase.getHomeFolder();
 
 function App() {
 
+  const [paneValue, setPaneValue] = useState('one'); 
   const [rootFolder, setRootFolder] = useState('');
   const [rootSubFolders, setRootSubFolders] = useState([]);
   const [mediaDrives, setMediaDrives] = useState([]);
@@ -51,6 +50,10 @@ function App() {
     color: '#2f8ca3'
   };
 
+  const handleTab = (e, newVal) => { 
+    setPaneValue(newVal); 
+  }; 
+
   useEffect(() => {
 
     if(rootFolder === '') {
@@ -70,8 +73,6 @@ function App() {
         setHomeFolder(arg);
       });
     }
-
-    console.log('root sub folders: ', rootSubFolders);
 
     if(isArrayEmpty(rootSubFolders)) {
        // Listen for the event
@@ -97,25 +98,74 @@ function App() {
     };
   }, []);
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        light: '#757ce8',
+        main: '#3f50b5',
+        dark: '#002884',
+        contrastText: '#fff',
+      },
+      secondary: {
+        light: '#ff7961',
+        main: '#f44336',
+        dark: '#ba000d',
+        contrastText: '#000',
+      },
+    },
+  });
+
+  const StyledTab = styled(Tab)({
+    "&.Mui-disabled": {
+      color: "red"
+    }
+  });
+
+  const BaseWhiteStyle = {color: 'white'};
+  const BasePinkStyle = {color: '#ff007f'};
+  const BaseBlueStyle = {color: '#2f8ca3'};
+
+  const tabStyles = tabValue => paneValue === tabValue ? BasePinkStyle : BaseWhiteStyle;
+
+  const TabOneStyle = tabStyles('one');
+  const TabTwoStyle = tabStyles('two');
+  const TabThreeStyle = tabStyles('three');
+
   return (
-      <div className="App" style={AppStyle}>
-
-          {homeFolder !== '' ? <SourcePane
-            paneName={SOURCE}
-            mediaDrives={mediaDrives}
-            homeFolder={homeFolder}
-          /> : null}
-
-          <CopyPane />
-
-          {homeFolder !== '' ? <TargetPane
-            paneName={TARGET}
-            mediaDrives={mediaDrives}
-            homeFolder={homeFolder}
-          /> : null}
-
-      </div>
-
+    <div className="App" style={AppStyle}>
+      <TabContext value={paneValue} id="tab-context-root"> 
+        <Box> 
+          <TabList 
+            value={paneValue} 
+            onChange={handleTab} 
+            textColor="primary"
+            indicatorColor="secondary"
+            style={{backgroundColor: 'black', color: 'white'}}
+          > 
+            <Tab style={TabOneStyle} value="one" label="Source Pane" /> 
+            <Tab style={TabTwoStyle} value="two" label="Copy Pane" /> 
+            <Tab style={TabThreeStyle} value="three" label="Target Pane" /> 
+          </TabList> 
+          <TabPanel value="one">
+            {homeFolder !== '' ? <SourcePane
+              paneName={SOURCE}
+              mediaDrives={mediaDrives}
+              homeFolder={homeFolder}
+            /> : null}
+          </TabPanel>
+          <TabPanel value="two">
+            <CopyPane />
+          </TabPanel>
+          <TabPanel value="three">
+            {homeFolder !== '' ? <TargetPane
+              paneName={TARGET}
+              mediaDrives={mediaDrives}
+              homeFolder={homeFolder}
+            /> : null}
+          </TabPanel>
+        </Box>
+      </TabContext>
+    </div>
   );
 }
 

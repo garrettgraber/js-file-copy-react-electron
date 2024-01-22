@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addCopyItem } from '../actions/copyAction.js';
+import { Tooltip } from 'react-tooltip';
+import Button from '@mui/material/Button';
+
+import { addCopyItem } from '../actions/actions.js';
 
 const FolderItemToCopy = props => {
 	const dispatch = useDispatch();
@@ -45,19 +48,26 @@ const FolderItemToCopy = props => {
 			style={FolderItemStyles}
 		>
 			<button
-				style={{margin: 0, border: 'none', backgroundColor: 'black', color: '#2f8ca3', width: 300, height: 43, fontSize: 16}}
+				style={{margin: 0, border: 'none', backgroundColor: 'black', color: '#2f8ca3', width: '100%', height: 43, fontSize: 16, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}
 				onClick={folderItemClick}
 				data-id={id}
 				data-name={name}
 				data-path={path}
 				data-isafile={isAFile}
 				data-isadirectory={isADirectory}
+				data-tooltip-id={id}
+				data-tooltip-position-strategy={'fixed'}
+				data-tooltip-place={'top-start'}
 			>
 				{CurrentItem.name}
 			</button>
-			<button style={{float:'right',marginRight: 10, marginTop: 10, marginBottom: 10, backgroundColor: '#2f8ca3', borderRadius: 2}} onClick={copyItem}>Copy</button>
-			{/*<input style={{float:'left',marginLeft: 10}} type="checkbox" name="copy"/>
-    	<label for="copy">{CurrentItem.name}</label>*/}
+			<Tooltip
+			  id={id}
+			  content={path}
+			  events={['hover']}
+			/>
+
+			<Button size="small" style={{float:'right',marginRight: 10, marginTop: 5, marginBottom: 5, backgroundColor: '#2f8ca3', borderRadius: 2, color: 'black'}} onClick={copyItem}>Copy</Button>
 		</div>
 	);
 

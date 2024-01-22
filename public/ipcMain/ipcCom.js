@@ -105,7 +105,8 @@ const ComObject = {
     GET_HOME_FOLDER: 'get_home_folder',
     GET_CURRENT_FOLDER_CONTENTS: 'get_current_folder_contents',
     GET_SOURCE_FOLDER_CONTENTS: 'get_source_folder_contents',
-    GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents'
+    GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
+    CREATE_FOLDER: 'create_folder'
   },
 };
 
@@ -221,6 +222,32 @@ class IpcCom {
 
 		  event.sender.send(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, directoryContentsNonHidden);
 		});
+
+		ipcMain.on(ComObject.channels.CREATE_FOLDER, (event, arg) => {
+
+			const { currentFolder, newFolder } = arg;
+			console.log('current folder: ', arg.currentFolder);
+			console.log('folder to create: ', arg.newFolder);
+
+			const newFolderPath = path.join(currentFolder, newFolder);
+
+			try {
+			  if (!fs.existsSync(newFolderPath)) {
+			    fs.mkdirSync(newFolderPath);
+			    const AjaxReturnObject = {
+			    	success: true,
+			    	folderName: newFolderPath,
+			    	currentFolder
+			    };
+			    event.sender.send(ComObject.channels.CREATE_FOLDER, AjaxReturnObject);
+			  }
+			} catch (err) {
+			  console.error(err);
+			  event.sender.send(ComObject.channels.CREATE_FOLDER, {success: false, error: err});
+			}
+
+		});
+
 		this.setupIpcCommunicationsHasRun = true;
 		console.log('setupIpcCommunications has run.');
   }

@@ -3,7 +3,9 @@ import { combineReducers } from 'redux';
 import {
 	ADD_COPY_ITEM,
 	DELETE_COPY_ITEM,
-	EMPTY_COPY_ITEMS
+	EMPTY_COPY_ITEMS,
+	CHANGE_CURRENT_SOURCE_FOLDER,
+	CHANGE_CURRENT_TARGET_FOLDER
 } from '../actionTypes/actionTypes.js';
 
 const copyCollection = (state = [], action) => {
@@ -31,8 +33,29 @@ const copyCollection = (state = [], action) => {
 	}
 };
 
-export default copyCollection;
+const sourceFolder = (state = '', action) => {
+	switch (action.type) {
+		case CHANGE_CURRENT_SOURCE_FOLDER:
+			return action.payload;
+		default:
+			return state;
+	}
+};
 
-// export default combineReducers({
-// 	copyCollection
-// });
+const targetFolder = (state = '', action) => {
+	switch (action.type) {
+		case CHANGE_CURRENT_TARGET_FOLDER:
+			return action.payload;
+		default:
+			return state;
+	}
+};
+
+
+// export default copyCollection;
+
+export default combineReducers({
+	copyCollection,
+	sourceFolder,
+	targetFolder
+});

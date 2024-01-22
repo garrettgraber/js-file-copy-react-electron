@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { deleteCopyItem } from '../actions/copyAction.js';
+import { Tooltip } from 'react-tooltip';
+import { deleteCopyItem } from '../actions/actions.js';
 
 const CopyItem = props => {
 	const dispatch = useDispatch();
@@ -24,12 +25,15 @@ const CopyItem = props => {
 		margin: 0,
 		backgroundColor: 'black',
 		color: '#2f8ca3',
-		width: 390,
+		// width: 376,
 		height: 43,
 		fontSize: 16,
 		alignItems: 'center',
 		paddingLeft: 5,
-		justifyContent: 'flex-end'
+		justifyContent: 'flex-end',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden',
+		whiteSpace: 'nowrap'
 	};
 
 	const CopyItemDeleteButtonStyles = {
@@ -67,7 +71,17 @@ const CopyItem = props => {
 			data-isafile={isAFile}
 			data-isadirectory={isADirectory}
 		>
-			<span>{name}</span>
+			<span style={{}}
+				data-tooltip-id={id}
+				data-tooltip-position-strategy={'fixed'}
+				data-tooltip-place={'top-start'}
+				style={{cursor: 'default'}}
+			>{name}</span>
+			<Tooltip
+			  id={id}
+			  content={path}
+			  events={['hover']}
+			/>
 			<button style={CopyItemDeleteButtonStyles} onClick={deleteItem}>Delete</button>
 			{/*<input style={{float:'left',marginLeft: 10}} type="checkbox" name="copy"/>
     	<label for="copy">{CurrentItem.name}</label>*/}

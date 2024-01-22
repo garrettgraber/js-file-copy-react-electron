@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
+import Button from '@mui/material/Button';
 
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
+
+import { changeCurrentSourceFolder } from '../actions/actions.js';
 
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
@@ -24,6 +28,8 @@ const stringToBoolean = s => {
 };
 
 const SourcePane = (props) => {
+	const dispatch = useDispatch();
+	const sourceFolder = useSelector((state) => state.sourceFolder);
 	// console.log('props: ', props);
 	const {
 		paneName,
@@ -36,7 +42,7 @@ const SourcePane = (props) => {
 	const paneColor = 'black';
 	// console.log('color: ', color);
 	const paneHeight = 535;
-	const paneWidth = 400;
+	const paneWidth = 1200;
 	const margin = 10;
 	const SourcePaneStyle = {
 		color: paneLetterColor,
@@ -54,12 +60,24 @@ const SourcePane = (props) => {
 
 	let FolderContentsSectionStyle = {
 		overflowY: 'scroll',
-		maxHeight: '78%',
+		maxHeight: '72%',
 		marginTop: 10
 	};
 
-	console.log('homeFolder: ', homeFolder);
-	console.log('mediaDrives: ', mediaDrives);
+	const DropdownStyle = {
+		width: '60%',
+		backgroundColor: 'black',
+		color: paneLetterColor
+	};
+
+	const UpDirectoryButtonStyle = {
+		height: 30,
+		width: 30,
+		marginLeft: 15,
+		fontSize: 20,
+		color: 'red',
+		backgroundColor: 'black'
+	};
 
 	const hardDriveHome = [
 	  homeFolder,
@@ -72,17 +90,11 @@ const SourcePane = (props) => {
 	const [currentFolderChange, setCurrentFolderChange] = useState(false);
 	const [baseHomeFolder, setBaseHomeFolder] = useState(homeFolder);
 
-	// if(homeFolder !== '' && baseHomeFolder === '') {
-	// 	console.log('Home folder is not blank: ', homeFolder);
-	// 	console.log('Base Home folder is blank: ', baseHomeFolder);
-	// 	setBaseHomeFolder(homeFolder);
-	// 	console.log('Base Home folder is NOT blank: ', baseHomeFolder);
-	// }
-
 	const choosePath = e => {
 		console.log('choose path: ', e);
 		console.log('currentFolder: ', currentFolder);
 		setCurrentFolder(e.value);
+		dispatch(changeCurrentSourceFolder(e.value));
 		// getSourceFolderContents(e.value);
 		ApiBase.getSourceFolderContents(e.value);
 		setCurrentFolderChange(true);
@@ -110,7 +122,22 @@ const SourcePane = (props) => {
 	    console.log('currentFolder: ', currentFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
 	    setCurrentFolder(dataItemClickedPath);
+	    dispatch(changeCurrentSourceFolder(dataItemClickedPath));
 	    ApiBase.getSourceFolderContents(dataItemClickedPath);
+		}
+	};
+
+	const upDirectory = e => {
+		console.log('upDirectory clicked: ', e);
+		console.log('currentFolder: ', currentFolder);
+		const currentFolderArray = currentFolder.split('/');
+		if(currentFolderArray.length > 2) {
+			currentFolderArray.pop();
+			const newCurrentFolderPath = currentFolderArray.join('/')
+			console.log('newCurrentFolderPath: ', newCurrentFolderPath);
+			setCurrentFolder(newCurrentFolderPath);
+			dispatch(changeCurrentSourceFolder(newCurrentFolderPath));
+	    ApiBase.getSourceFolderContents(newCurrentFolderPath);
 		}
 	};
 
@@ -138,16 +165,25 @@ const SourcePane = (props) => {
     };
 	}, []);
 
+	if(currentFolderConents.length > 9) {
+		FolderContentsSectionStyle.overflowY = 'scroll';
+	} else {
+		FolderContentsSectionStyle.overflowY = 'auto';
+	}
+
   return (
     <div className='SourcePane' style={SourcePaneStyle}>
-    	<h2>{paneName}</h2>
-
-    	<Dropdown options={options} onChange={choosePath} value={defaultOption} placeholder='Select a File or Folder' />
+    	<div>
+    		<h2>{paneName}</h2>
+    	</div>
+    	<Dropdown style={DropdownStyle} options={options} onChange={choosePath} value={defaultOption} placeholder='Select a File or Folder' />
+    	<div style={{paddingTop: 10}}>
+    		<span>{currentFolder}</span>
+    		<Button variant="outlined" style={UpDirectoryButtonStyle} onClick={upDirectory}>&#8593;</Button>
+    	</div>
     	<div style={FolderContentsSectionStyle}>
-
 	    	{currentFolderConents.length > 0 ? currentFolderConents.map((CurrentItem) => (<FolderItemToCopy key={uuidv4()} CurrentItem={CurrentItem} folderItemClick={clickItem} />)) : null }
     	</div>
-
     </div>
   );
 };

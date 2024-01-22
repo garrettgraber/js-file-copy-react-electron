@@ -8,7 +8,8 @@ const ComObject = {
     GET_HOME_FOLDER: 'get_home_folder',
     GET_CURRENT_FOLDER_CONTENTS: 'get_current_folder_contents',
     GET_SOURCE_FOLDER_CONTENTS: 'get_source_folder_contents',
-    GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents'
+    GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
+    CREATE_FOLDER: 'create_folder'
   },
 };
 
