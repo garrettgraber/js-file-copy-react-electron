@@ -30,7 +30,8 @@ const stringToBoolean = s => {
 const SourcePane = (props) => {
 	const dispatch = useDispatch();
 	const sourceFolder = useSelector((state) => state.sourceFolder);
-	// console.log('props: ', props);
+	console.log('sourceFolder before props: ', sourceFolder);
+
 	const {
 		paneName,
 		homeFolder,
@@ -85,19 +86,17 @@ const SourcePane = (props) => {
 	const options = hardDriveHome.concat(mediaDrives);
 	const defaultOption = options[0];
 
-	const [currentFolder, setCurrentFolder] = useState(homeFolder);
 	const [currentFolderConents, setCurrentFolderContents] = useState([]);
-	const [currentFolderChange, setCurrentFolderChange] = useState(false);
 	const [baseHomeFolder, setBaseHomeFolder] = useState(homeFolder);
+
+	console.log('sourceFolder: ', sourceFolder);
 
 	const choosePath = e => {
 		console.log('choose path: ', e);
-		console.log('currentFolder: ', currentFolder);
-		setCurrentFolder(e.value);
+		console.log('sourceFolder: ', sourceFolder);
 		dispatch(changeCurrentSourceFolder(e.value));
 		// getSourceFolderContents(e.value);
 		ApiBase.getSourceFolderContents(e.value);
-		setCurrentFolderChange(true);
 	};
 
 	const clickItem = e => {
@@ -118,10 +117,9 @@ const SourcePane = (props) => {
 		if(isADirectory && !isAFile) {
 			console.log('data-item: ', e.target.getAttribute('data-name'));
 	    const dataItemClicked = e.target.getAttribute('data-name');
-	    const dataItemClickedPath = `${currentFolder}/${dataItemClicked}`;
-	    console.log('currentFolder: ', currentFolder);
+	    const dataItemClickedPath = `${sourceFolder}/${dataItemClicked}`;
+	    console.log('sourceFolder: ', sourceFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
-	    setCurrentFolder(dataItemClickedPath);
 	    dispatch(changeCurrentSourceFolder(dataItemClickedPath));
 	    ApiBase.getSourceFolderContents(dataItemClickedPath);
 		}
@@ -129,13 +127,12 @@ const SourcePane = (props) => {
 
 	const upDirectory = e => {
 		console.log('upDirectory clicked: ', e);
-		console.log('currentFolder: ', currentFolder);
-		const currentFolderArray = currentFolder.split('/');
+		console.log('sourceFolder: ', sourceFolder);
+		const currentFolderArray = sourceFolder.split('/');
 		if(currentFolderArray.length > 2) {
 			currentFolderArray.pop();
 			const newCurrentFolderPath = currentFolderArray.join('/')
 			console.log('newCurrentFolderPath: ', newCurrentFolderPath);
-			setCurrentFolder(newCurrentFolderPath);
 			dispatch(changeCurrentSourceFolder(newCurrentFolderPath));
 	    ApiBase.getSourceFolderContents(newCurrentFolderPath);
 		}
@@ -147,7 +144,6 @@ const SourcePane = (props) => {
       console.log('event: ', event);
       console.log('found current source folder contents: ', arg);
       setCurrentFolderContents(arg);
-      // setCurrentFolderChange(false);
     });
 
     if(homeFolder !== '') {
@@ -155,8 +151,10 @@ const SourcePane = (props) => {
     	console.log('baseHomeFolder: ', baseHomeFolder);
     }
 
-    if(currentFolderConents.length > 0) {
-
+    if(currentFolderConents.length === 0) {
+    	console.log('currentFolderConents is empty: ', currentFolderConents);
+    	console.log('sourceFolder is: ', sourceFolder);
+    	ApiBase.getSourceFolderContents(sourceFolder);
     }
    
     // Clean the listener after the component is dismounted
@@ -178,7 +176,7 @@ const SourcePane = (props) => {
     	</div>
     	<Dropdown style={DropdownStyle} options={options} onChange={choosePath} value={defaultOption} placeholder='Select a File or Folder' />
     	<div style={{paddingTop: 10}}>
-    		<span>{currentFolder}</span>
+    		<span>{sourceFolder}</span>
     		<Button variant="outlined" style={UpDirectoryButtonStyle} onClick={upDirectory}>&#8593;</Button>
     	</div>
     	<div style={FolderContentsSectionStyle}>

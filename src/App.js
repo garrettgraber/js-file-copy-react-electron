@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { Box, Tabs, Tab } from '@mui/material';
 import { TabContext, TabPanel, TabList } from '@mui/lab';
 import { ThemeProvider, createTheme, ThemeOptions, styled } from '@mui/material/styles';
+
+import { changeCurrentSourceFolder, changeCurrentTargetFolder } from './actions/actions.js';
+
 
 import ComObject from './api/COM.js';
 import ApiBase from './api/apiBase.js';
@@ -27,6 +32,9 @@ ApiBase.getMediaDrives();
 ApiBase.getHomeFolder();
 
 function App() {
+  const dispatch = useDispatch();
+  // const sourceFolder = useSelector((state) => state.sourceFolder);
+  // const targetFolder = useSelector((state) => state.targetFolder);
 
   const [paneValue, setPaneValue] = useState('one'); 
   const [rootFolder, setRootFolder] = useState('');
@@ -71,6 +79,9 @@ function App() {
         console.log('event: ', event);
         console.log('home folder: ', arg);
         setHomeFolder(arg);
+
+        dispatch(changeCurrentSourceFolder(arg));
+        dispatch(changeCurrentTargetFolder(arg));
       });
     }
 
@@ -130,6 +141,9 @@ function App() {
   const TabOneStyle = tabStyles('one');
   const TabTwoStyle = tabStyles('two');
   const TabThreeStyle = tabStyles('three');
+
+  // console.log('sourceFolder before SourcePane: ', sourceFolder);
+  // console.log('targetFolder before TargetPane: ', targetFolder);
 
   return (
     <div className="App" style={AppStyle}>

@@ -27,7 +27,7 @@ const FolderItemToCopy = props => {
 		display: 'flex'
 	};
 
-	console.log('CurrentItem: ', CurrentItem);
+	// console.log('CurrentItem: ', CurrentItem);
 
 	const copyItem = e => {
 		console.log('item to copy: ', e);
