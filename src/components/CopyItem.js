@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Tooltip } from 'react-tooltip';
+import { LinearProgress } from '@mui/material';
 import { deleteCopyItem } from '../actions/actions.js';
+import ComObject from '../api/COM.js';
+
+const { api } = window;
 
 const CopyItem = props => {
 	const dispatch = useDispatch();
@@ -16,6 +20,8 @@ const CopyItem = props => {
 		isAFile,
 		isADirectory
 	} = CurrentItem;
+
+	const [percentageDone, setPercentageDone] = useState(0);
 
 	const CopyItemStyles = {
 		border: '1px solid #0FFF50',
@@ -55,6 +61,13 @@ const CopyItem = props => {
 	};
 
 	useEffect(() => {
+
+		api.recieve(`${ComObject.channels.GET_STATUS_OF_COPY}-${id}`, (event, arg) => {
+			setPercentageDone(arg.percentageDone);
+      console.log(`${arg.percentageDone}%. ${name}`);
+      // console.log('event: ', event);
+      // console.log('Get Status of Copy: ', arg);
+    });
  
     // Clean the listener after the component is dismounted
     return () => {
@@ -71,6 +84,10 @@ const CopyItem = props => {
 			data-isafile={isAFile}
 			data-isadirectory={isADirectory}
 		>
+			<span style={{position: 'absolute', left: 50}}>{percentageDone}&nbsp;&#37;</span>
+
+			<LinearProgress style={{position: 'absolute', left: 50}} size="lg" value={percentageDone} />
+
 			<span style={{}}
 				data-tooltip-id={id}
 				data-tooltip-position-strategy={'fixed'}

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const progress = require('progress-stream');
+const { ipcRenderer } = require('electron');
 
 const MINUTE = 'minute';
 const SECOND = 'second';
@@ -8,6 +9,13 @@ const EMPTY_STRING = '';
 const EMPTY_SPACE = ' ';
 const AND = ' and ';
 const SIXTY = 60.0;
+
+
+const ComObject = {
+  channels: {
+    GET_STATUS_OF_COPY: 'get_status_of_copy'
+  },
+};
 
 const timeStringModifier = (timeCount, timeString) => {
 	const timeStringPlural = `${timeString}s`;
@@ -27,7 +35,7 @@ const getTimeString = timeInSeconds => {
 	}
 };
 
-const streamFile = (sourceFile, targetFile) => {
+const streamFile = (sourceFile, targetFile, win) => {
 	const sourceFileExists = fs.existsSync(sourceFile);
 	const targetFileExists = fs.existsSync(targetFile);
 
@@ -111,7 +119,7 @@ const streamFile = (sourceFile, targetFile) => {
 
 };
 
-const streamFilePromise = (sourceFile, targetFile) => {
+const streamFilePromise = (sourceFile, targetFile, win, id) => {
 	return new Promise((resolve, reject) => {
 
 		const sourceFileExists = fs.existsSync(sourceFile);
@@ -159,38 +167,44 @@ const streamFilePromise = (sourceFile, targetFile) => {
 			const readStream = fs.createReadStream(sourceFile);
 			const writeStream = fs.createWriteStream(targetFile);
 
-			readStream.pipe(progressString).pipe(writeStream);
+			// readStream.pipe(progressString).pipe(writeStream);
 
 			// readStream.pipe(progressString);
 
-			// let totalDataTransfered = 0;
+			let totalDataTransfered = 0;
 
-			// readStream.on('data', chunk => {
-			// 	//write into the file  one piece at a time
-			// 	// console.log('chunk length: ', chunk.length);
-			// 	totalDataTransfered += chunk.length;
-			// 	const totalDataTransferedRatio = parseFloat(totalDataTransfered / sourceStatSize);
-			// 	const totalDataTransferedPercentageRaw = parseFloat(totalDataTransferedRatio * 100.00);
-			// 	const totalDataTransferedPercentage = Math.floor(totalDataTransferedPercentageRaw * 100) / 100.0;
-			// 	console.log(`Percentage Done: ${totalDataTransferedPercentage}%`);
-			// 	writeStream.write(chunk);
-			// });
-
-			// readStream.on('end', () => {
-		  //   //after that we read the all file piece  by piece we close the stram 
-			// 	console.log('Done reading File');
-		  //   writeStream.end();
-			// });
+			readStream.on('data', chunk => {
+				//write into the file  one piece at a time
+				// console.log('chunk length: ', chunk.length);
+				totalDataTransfered += chunk.length;
+				const totalDataTransferedRatio = parseFloat(totalDataTransfered / sourceStatSize);
+				const totalDataTransferedPercentageRaw = parseFloat(totalDataTransferedRatio * 100.00);
+				const totalDataTransferedPercentage = Math.floor(totalDataTransferedPercentageRaw * 100) / 100.0;
+				console.log(`Percentage Done: ${totalDataTransferedPercentage}%`);
+				writeStream.write(chunk);
+				const ComChannelCopyStatus = `${ComObject.channels.GET_STATUS_OF_COPY}-${id}`;
+				win.webContents.send(ComChannelCopyStatus, {
+					id,
+					sourceFile,
+					percentageDone: totalDataTransferedPercentage
+				});
+			});
 
 			readStream.on('end', () => {
-				console.log('Done reading File: ', sourceFile);
-				// writeStream.end();
+		    //after that we read the all file piece  by piece we close the stram 
+				console.log('Done reading File');
+		    writeStream.end();
 			});
 
-			writeStream.on('finish', () => {
-				console.log('Done writing File: ', targetFile);
-				resolve(`Done Writing: ${targetFile}`);
-			});
+			// readStream.on('end', () => {
+			// 	console.log('Done reading File: ', sourceFile);
+			// 	// writeStream.end();
+			// });
+
+			// writeStream.on('finish', () => {
+			// 	console.log('Done writing File: ', targetFile);
+			// 	resolve(`Done Writing: ${targetFile}`);
+			// });
 
 		} else {
 			console.log(`Source file does not exist: ${sourceFile}`);

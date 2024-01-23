@@ -5,6 +5,7 @@ const {
   BrowserWindow
 } = require('electron');
 
+const IpcCom = require('./ipcMain/ipcCom.js');
 
 function createWindow () {
   // Create the browser window.
@@ -22,6 +23,8 @@ function createWindow () {
 
   // Open the DevTools.
   win.webContents.openDevTools({ mode: 'detach' });
+
+  const IpcComObject = new IpcCom(win);
 }
 
 // This method will be called when Electron has finished
@@ -50,16 +53,20 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-const IpcComObject = require('./ipcMain/ipcCom.js');
-const IpcComObject2 = require('./ipcMain/ipcCom.js');
 
-console.log('IpcComObject: ', IpcComObject);
-console.log('IpcComObject2: ', IpcComObject2);
 
-const IpcComObjectAreTheSame = IpcComObject === IpcComObject2;
-const IpcComObjectAreTheSameDoubleEquals = IpcComObject == IpcComObject2;
-const IpcComObjectAreTheSameObjectIs = Object.is(IpcComObject,IpcComObject2);
 
-console.log('IpcComObjectAreTheSame: ', IpcComObjectAreTheSame);
-console.log('IpcComObjectAreTheSameDoubleEquals: ', IpcComObjectAreTheSameDoubleEquals);
-console.log('IpcComObjectAreTheSameObjectIs: ', IpcComObjectAreTheSameObjectIs);
+// const IpcComObject = new IpcCom(win);
+
+// const IpcComObject2 = require('./ipcMain/ipcCom.js');
+
+// console.log('IpcComObject: ', IpcComObject);
+// console.log('IpcComObject2: ', IpcComObject2);
+
+// const IpcComObjectAreTheSame = IpcComObject === IpcComObject2;
+// const IpcComObjectAreTheSameDoubleEquals = IpcComObject == IpcComObject2;
+// const IpcComObjectAreTheSameObjectIs = Object.is(IpcComObject,IpcComObject2);
+
+// console.log('IpcComObjectAreTheSame: ', IpcComObjectAreTheSame);
+// console.log('IpcComObjectAreTheSameDoubleEquals: ', IpcComObjectAreTheSameDoubleEquals);
+// console.log('IpcComObjectAreTheSameObjectIs: ', IpcComObjectAreTheSameObjectIs);

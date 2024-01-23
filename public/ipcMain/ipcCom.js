@@ -7,6 +7,12 @@ const { v4: uuidv4 } = require('uuid');
 
 const { ipcMain } = require('electron');
 
+const {
+	streamFile,
+	streamFilePromise
+} = require('../file-streamer.js');
+const Folder = require('../Folder.js');
+
 
 const WINDOWS_RAW = 'win32';
 const LINUX_RAW = 'linux';
@@ -106,17 +112,163 @@ const ComObject = {
     GET_CURRENT_FOLDER_CONTENTS: 'get_current_folder_contents',
     GET_SOURCE_FOLDER_CONTENTS: 'get_source_folder_contents',
     GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
-    CREATE_FOLDER: 'create_folder'
+    CREATE_FOLDER: 'create_folder',
+    COPY_FILE: 'copy_file',
+    COPY_FOLDER: 'copy_folder'
   },
+};
+
+const ipcGetRootFolder = () => {
+	ipcMain.on(ComObject.channels.GET_ROOT_FOLDER, (event, arg) => {
+	  console.log(arg);
+	  event.sender.send(ComObject.channels.GET_ROOT_FOLDER, root);
+	});
+};
+const ipcGetRootSubFolders = () => {
+	ipcMain.on(ComObject.channels.GET_ROOT_SUB_FOLDERS, (event, arg) => {
+	  console.log(arg);
+	  event.sender.send(ComObject.channels.GET_ROOT_SUB_FOLDERS, rootSubFolders);
+	});
+};
+const ipcGetMediaDrives = () => {
+	ipcMain.on(ComObject.channels.GET_MEDIA_DRVIES, (event, arg) => {
+	  console.log(arg);
+	  event.sender.send(ComObject.channels.GET_MEDIA_DRVIES, mediaDrivesFound);
+	});
+};
+const ipcGetHomeFolder = () => {
+	ipcMain.on(ComObject.channels.GET_HOME_FOLDER, (event, arg) => {
+	  console.log(arg);
+	  if(CURRENT_PLATFORM === LINUX_PLATFORM && rootSubFolders.includes('home')) {
+	    event.sender.send(ComObject.channels.GET_HOME_FOLDER, `/${homeFolderName}`);
+	  } else {
+	    event.sender.send(ComObject.channels.GET_HOME_FOLDER, '/lame');
+	  }
+	});
+};
+const ipcGetSourceFolderContents = () => {
+	ipcMain.on(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, (event, arg) => {
+	  console.log('current Source folder: ', arg);
+
+	  const directoryContents = fs.readdirSync(arg.folderPath);
+	  const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
+
+	  console.log('Source Directory Contents: ', directoryContents);
+
+	  console.log('Source Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
+
+	  const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
+
+	  console.log('Source Full Path Array: ', fullPathArray);
+
+	  const currentFolderItemsArray = createFolderItemArray(fullPathArray);
+
+	  currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
+
+	  // console.log('Source currentFolderItemsArray: ', currentFolderItemsArray);
+
+	  event.sender.send(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, currentFolderItemsArray);
+	});
+};
+const ipcGetTargetFolderContents = () => {
+	ipcMain.on(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, (event, arg) => {
+	  console.log('current Target folder: ', arg);
+
+	  const directoryContents = fs.readdirSync(arg.folderPath);
+
+	  const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
+	  console.log('Target Directory Contents: ', directoryContents);
+
+	  console.log('Target Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
+
+	  const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
+
+	  console.log('Target Full Path Array: ', fullPathArray);
+
+	  const currentFolderItemsArray = createFolderItemArray(fullPathArray);
+
+	  currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
+
+	  // console.log('Target currentFolderItemsArray: ', currentFolderItemsArray);
+
+	  event.sender.send(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, currentFolderItemsArray);
+	});
+};
+const ipcGetCurrentFolderContents = () => {
+	ipcMain.on(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, (event, arg) => {
+	  console.log('current folder: ', arg);
+
+	  const directoryContents = fs.readdirSync(arg.folderPath);
+	  console.log('Target Directory Contents: ', directoryContents);
+
+	  const directoryContentsNonHidden = directoryContents.filter(n => !n.startsWith('.'));
+
+	  event.sender.send(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, directoryContentsNonHidden);
+	});
+};
+const ipcCreateFolder = () => {
+	ipcMain.on(ComObject.channels.CREATE_FOLDER, (event, arg) => {
+		const { currentFolder, newFolder } = arg;
+		console.log('current folder: ', arg.currentFolder);
+		console.log('folder to create: ', arg.newFolder);
+
+		const newFolderPath = path.join(currentFolder, newFolder);
+
+		try {
+		  if (!fs.existsSync(newFolderPath)) {
+		    fs.mkdirSync(newFolderPath);
+		    const AjaxReturnObject = {
+		    	success: true,
+		    	folderName: newFolderPath,
+		    	currentFolder
+		    };
+		    event.sender.send(ComObject.channels.CREATE_FOLDER, AjaxReturnObject);
+		  }
+		} catch (err) {
+		  console.error(err);
+		  event.sender.send(ComObject.channels.CREATE_FOLDER, {success: false, error: err});
+		}
+	});
+};
+const ipcCopyFile = (win) => {
+	ipcMain.on(ComObject.channels.COPY_FILE, async (event, arg) => {
+		try {
+			console.log('File to Copy: ', arg);
+			const { sourceFilePath, targetFilePath, id } = arg;
+			const response = await streamFilePromise(sourceFilePath, targetFilePath, win, id);
+			console.log('response: ', response);
+			event.sender.send(ComObject.channels.COPY_FILE, {success: true, response});
+		} catch (error) {
+	    console.error(`Could not get products: ${error}`);
+	    event.sender.send(ComObject.channels.COPY_FILE, {success: false, error});
+	  }
+	});
+};
+const ipcCopyFolder = (win) => {
+	ipcMain.on(ComObject.channels.COPY_FOLDER, async (event, arg) => {
+		try {
+			console.log('Folder to Copy: ', arg);
+			const { sourceFolderPath, targetFolderPath, id } = arg;
+			const FolderToCopy = new Folder(sourceFolderPath, win, id);
+			FolderToCopy.treeSearch();
+			const response = await FolderToCopy.createSubFoldersAndCopyAsync(targetFolderPath);
+			console.log('response: ', response);
+			event.sender.send(ComObject.channels.COPY_FOLDER, response);
+		} catch (error) {
+	    console.error(`Could not get products: ${error}`);
+	    event.sender.send(ComObject.channels.COPY_FOLDER, {success: false, error});
+	  }
+	});
 };
 
 let instance;
 
 class IpcCom {
-	constructor() {
+	constructor(win) {
     if (instance) {
       throw new Error("You can only create one instance!");
     }
+    this.win = win;
     this.getCurrentPlatorm = getCurrentPlatorm;
     this.getUsbDrives = getUsbDrives;
     this.mediaDrivesFound = mediaDrivesFound;
@@ -142,111 +294,119 @@ class IpcCom {
 
   setupIpcCommunications() {
   	console.log('setupIpcCommunications has started.');
-		ipcMain.on(ComObject.channels.GET_ROOT_FOLDER, (event, arg) => {
-		  console.log(arg);
-		  event.sender.send(ComObject.channels.GET_ROOT_FOLDER, root);
-		});
+  	const _win = this.win;
 
-		ipcMain.on(ComObject.channels.GET_ROOT_SUB_FOLDERS, (event, arg) => {
-		  console.log(arg);
-		  event.sender.send(ComObject.channels.GET_ROOT_SUB_FOLDERS, rootSubFolders);
-		});
+  	console.log('_win: ', _win);
 
-		ipcMain.on(ComObject.channels.GET_MEDIA_DRVIES, (event, arg) => {
-		  console.log(arg);
-		  event.sender.send(ComObject.channels.GET_MEDIA_DRVIES, mediaDrivesFound);
-		});
+  	ipcGetRootFolder();
+  	ipcGetRootSubFolders();
+  	ipcGetMediaDrives();
+  	ipcGetHomeFolder();
+  	ipcGetSourceFolderContents();
+  	ipcGetTargetFolderContents();
+  	ipcGetCurrentFolderContents();
+  	ipcCreateFolder();
+  	ipcCopyFile(_win);
+  	ipcCopyFolder(_win);
 
-		ipcMain.on(ComObject.channels.GET_HOME_FOLDER, (event, arg) => {
-		  console.log(arg);
-		  if(CURRENT_PLATFORM === LINUX_PLATFORM && rootSubFolders.includes('home')) {
-		    event.sender.send(ComObject.channels.GET_HOME_FOLDER, `/${homeFolderName}`);
-		  } else {
-		    event.sender.send(ComObject.channels.GET_HOME_FOLDER, '/lame');
-		  }
-		});
+		// ipcMain.on(ComObject.channels.GET_ROOT_FOLDER, (event, arg) => {
+		//   console.log(arg);
+		//   event.sender.send(ComObject.channels.GET_ROOT_FOLDER, root);
+		// });
+		// ipcMain.on(ComObject.channels.GET_ROOT_SUB_FOLDERS, (event, arg) => {
+		//   console.log(arg);
+		//   event.sender.send(ComObject.channels.GET_ROOT_SUB_FOLDERS, rootSubFolders);
+		// });
+		// ipcMain.on(ComObject.channels.GET_MEDIA_DRVIES, (event, arg) => {
+		//   console.log(arg);
+		//   event.sender.send(ComObject.channels.GET_MEDIA_DRVIES, mediaDrivesFound);
+		// });
+		// ipcMain.on(ComObject.channels.GET_HOME_FOLDER, (event, arg) => {
+		//   console.log(arg);
+		//   if(CURRENT_PLATFORM === LINUX_PLATFORM && rootSubFolders.includes('home')) {
+		//     event.sender.send(ComObject.channels.GET_HOME_FOLDER, `/${homeFolderName}`);
+		//   } else {
+		//     event.sender.send(ComObject.channels.GET_HOME_FOLDER, '/lame');
+		//   }
+		// });
+		// ipcMain.on(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, (event, arg) => {
+		//   console.log('current Source folder: ', arg);
 
-		ipcMain.on(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, (event, arg) => {
-		  console.log('current Source folder: ', arg);
+		//   const directoryContents = fs.readdirSync(arg.folderPath);
+		//   const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
 
-		  const directoryContents = fs.readdirSync(arg.folderPath);
-		  const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
+		//   console.log('Source Directory Contents: ', directoryContents);
 
-		  console.log('Source Directory Contents: ', directoryContents);
+		//   console.log('Source Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
 
-		  console.log('Source Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
+		//   const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
 
-		  const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
+		//   console.log('Source Full Path Array: ', fullPathArray);
 
-		  console.log('Source Full Path Array: ', fullPathArray);
+		//   const currentFolderItemsArray = createFolderItemArray(fullPathArray);
 
-		  const currentFolderItemsArray = createFolderItemArray(fullPathArray);
+		//   currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
 
-		  currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
+		//   // console.log('Source currentFolderItemsArray: ', currentFolderItemsArray);
 
-		  // console.log('Source currentFolderItemsArray: ', currentFolderItemsArray);
+		//   event.sender.send(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, currentFolderItemsArray);
+		// });
+		// ipcMain.on(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, (event, arg) => {
+		//   console.log('current Target folder: ', arg);
 
-		  event.sender.send(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, currentFolderItemsArray);
-		});
+		//   const directoryContents = fs.readdirSync(arg.folderPath);
 
-		ipcMain.on(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, (event, arg) => {
-		  console.log('current Target folder: ', arg);
+		//   const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
+		//   console.log('Target Directory Contents: ', directoryContents);
 
-		  const directoryContents = fs.readdirSync(arg.folderPath);
+		//   console.log('Target Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
 
-		  const directoryContentsNonHiddenFirst = sortArrayByNonHiddenFirst(directoryContents);
-		  console.log('Target Directory Contents: ', directoryContents);
+		//   const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
 
-		  console.log('Target Directory Contents Non Hidden First: ', directoryContentsNonHiddenFirst);
+		//   console.log('Target Full Path Array: ', fullPathArray);
 
-		  const fullPathArray = createFullPathArray(arg.folderPath, directoryContentsNonHiddenFirst);
+		//   const currentFolderItemsArray = createFolderItemArray(fullPathArray);
 
-		  console.log('Target Full Path Array: ', fullPathArray);
+		//   currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
 
-		  const currentFolderItemsArray = createFolderItemArray(fullPathArray);
+		//   // console.log('Target currentFolderItemsArray: ', currentFolderItemsArray);
 
-		  currentFolderItemsArray.forEach(el => console.log(JSON.stringify(el)));
+		//   event.sender.send(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, currentFolderItemsArray);
+		// });
+		// ipcMain.on(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, (event, arg) => {
+		//   console.log('current folder: ', arg);
 
-		  // console.log('Target currentFolderItemsArray: ', currentFolderItemsArray);
+		//   const directoryContents = fs.readdirSync(arg.folderPath);
+		//   console.log('Target Directory Contents: ', directoryContents);
 
-		  event.sender.send(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, currentFolderItemsArray);
-		});
+		//   const directoryContentsNonHidden = directoryContents.filter(n => !n.startsWith('.'));
 
-		ipcMain.on(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, (event, arg) => {
-		  console.log('current folder: ', arg);
+		//   event.sender.send(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, directoryContentsNonHidden);
+		// });
+		// ipcMain.on(ComObject.channels.CREATE_FOLDER, (event, arg) => {
+		// 	const { currentFolder, newFolder } = arg;
+		// 	console.log('current folder: ', arg.currentFolder);
+		// 	console.log('folder to create: ', arg.newFolder);
 
-		  const directoryContents = fs.readdirSync(arg.folderPath);
-		  console.log('Target Directory Contents: ', directoryContents);
+		// 	const newFolderPath = path.join(currentFolder, newFolder);
 
-		  const directoryContentsNonHidden = directoryContents.filter(n => !n.startsWith('.'));
-
-		  event.sender.send(ComObject.channels.GET_CURRENT_FOLDER_CONTENTS, directoryContentsNonHidden);
-		});
-
-		ipcMain.on(ComObject.channels.CREATE_FOLDER, (event, arg) => {
-
-			const { currentFolder, newFolder } = arg;
-			console.log('current folder: ', arg.currentFolder);
-			console.log('folder to create: ', arg.newFolder);
-
-			const newFolderPath = path.join(currentFolder, newFolder);
-
-			try {
-			  if (!fs.existsSync(newFolderPath)) {
-			    fs.mkdirSync(newFolderPath);
-			    const AjaxReturnObject = {
-			    	success: true,
-			    	folderName: newFolderPath,
-			    	currentFolder
-			    };
-			    event.sender.send(ComObject.channels.CREATE_FOLDER, AjaxReturnObject);
-			  }
-			} catch (err) {
-			  console.error(err);
-			  event.sender.send(ComObject.channels.CREATE_FOLDER, {success: false, error: err});
-			}
-
-		});
+		// 	try {
+		// 	  if (!fs.existsSync(newFolderPath)) {
+		// 	    fs.mkdirSync(newFolderPath);
+		// 	    const AjaxReturnObject = {
+		// 	    	success: true,
+		// 	    	folderName: newFolderPath,
+		// 	    	currentFolder
+		// 	    };
+		// 	    event.sender.send(ComObject.channels.CREATE_FOLDER, AjaxReturnObject);
+		// 	  }
+		// 	} catch (err) {
+		// 	  console.error(err);
+		// 	  event.sender.send(ComObject.channels.CREATE_FOLDER, {success: false, error: err});
+		// 	}
+		// });
+		// ipcMain.on(ComObject.channels.COPY_FILE,(event, arg) => {
+		// });
 
 		this.setupIpcCommunicationsHasRun = true;
 		console.log('setupIpcCommunications has run.');
@@ -255,8 +415,8 @@ class IpcCom {
 }
 
 
-const IpcComInstance = new IpcCom();
+// const IpcComInstance = new IpcCom();
 
-module.exports = IpcComInstance;
+module.exports = IpcCom;
 
 

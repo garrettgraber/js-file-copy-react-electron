@@ -9,7 +9,10 @@ const ComObject = {
     GET_CURRENT_FOLDER_CONTENTS: 'get_current_folder_contents',
     GET_SOURCE_FOLDER_CONTENTS: 'get_source_folder_contents',
     GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
-    CREATE_FOLDER: 'create_folder'
+    CREATE_FOLDER: 'create_folder',
+    COPY_FILE: 'copy_file',
+    COPY_FOLDER: 'copy_folder',
+    GET_STATUS_OF_COPY: 'get_status_of_copy'
   },
 };
 

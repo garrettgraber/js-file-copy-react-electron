@@ -3,14 +3,17 @@ import { useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import Button from '@mui/material/Button';
 
-
 import { emptyCopyItems } from '../actions/actions.js';
-
+import ComObject from '../api/COM.js';
+import ApiBase from '../api/apiBase.js';
 import CopyItem from './CopyItem.js';
+
+const { api } = window;
 
 const CopyPane = (props) => {
 	// console.log('props: ', props);
 	const copyCollection = useSelector((state) => state.copyCollection);
+  const targetFolder = useSelector((state) => state.targetFolder);
 
 	const dispatch = useDispatch();
 
@@ -49,10 +52,37 @@ const CopyPane = (props) => {
   	dispatch(emptyCopyItems());
   };
 
+  const copyAllItems = e => {
+    for(const CurrentCopyItem of copyCollection) {
+      console.log('CurrentCopyItem: ', CurrentCopyItem);
+      if(CurrentCopyItem.isAFile && !CurrentCopyItem.isADirectory) {
+        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`
+        ApiBase.copyFile(CurrentCopyItem.id, CurrentCopyItem.path, targetPath);
+      }
+      if(!CurrentCopyItem.isAFile && CurrentCopyItem.isADirectory) {
+        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`
+        ApiBase.copyFolder(CurrentCopyItem.id, CurrentCopyItem.path, targetPath);
+      }
+    }
+  };
+
 	useEffect(() => {
 
-		
+		api.recieve(ComObject.channels.COPY_FILE, (event, arg) => {
+      console.log('event: ', event);
+      console.log('Copied File: ', arg);
+    });
+
+    api.recieve(ComObject.channels.COPY_FOLDER, (event, arg) => {
+      console.log('event: ', event);
+      console.log('Copied Folder: ', arg);
+    });
    
+    // api.recieve(ComObject.channels.GET_STATUS_OF_COPY, (event, arg) => {
+    //   console.log('event: ', event);
+    //   console.log('Get Status of Copy: ', arg);
+    // });
+
     // Clean the listener after the component is dismounted
     return () => {
       
@@ -69,7 +99,7 @@ const CopyPane = (props) => {
     <div style={CopyPaneStyle}>
       <h2>Files and Folders to Copy</h2>
       <div style={CopyPaneButtonContainerStyle}>
-      	<Button variant="outlined" style={CopyPaneButtonStyle}>Copy All</Button>
+      	<Button variant="outlined" onClick={copyAllItems} style={CopyPaneButtonStyle}>Copy All</Button>
       	<Button variant="outlined" onClick={removeAllItems} style={CopyPaneButtonStyle}>Remove All</Button>
       </div>
 
