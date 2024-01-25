@@ -1,9 +1,13 @@
 import { useState, useEffect, React } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import Button from '@mui/material/Button';
 
-import { emptyCopyItems } from '../actions/actions.js';
+import {
+  emptyCopyItems,
+  copyAllItemsIsActive,
+  copyAllItemsIsNotActive
+} from '../actions/actions.js';
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
 import CopyItem from './CopyItem.js';
@@ -14,8 +18,11 @@ const CopyPane = (props) => {
 	// console.log('props: ', props);
 	const copyCollection = useSelector((state) => state.copyCollection);
   const targetFolder = useSelector((state) => state.targetFolder);
+  const copyAllItems = useSelector((state) => state.copyAllItems);
 
 	const dispatch = useDispatch();
+
+  const [copyAll, setCopyAll] = useState(false);
 
 	const CopyPaneStyle = {
     width: 1200,
@@ -48,22 +55,24 @@ const CopyPane = (props) => {
     marginTop: 10
   };
 
-  const removeAllItems = e => {
+  const removeAllItemsHandler = e => {
   	dispatch(emptyCopyItems());
   };
 
-  const copyAllItems = e => {
+  const copyAllItemsHandler = e => {
+    setCopyAll(true);
+    dispatch(copyAllItemsIsActive());
     for(const CurrentCopyItem of copyCollection) {
-      console.log('CurrentCopyItem: ', CurrentCopyItem);
       if(CurrentCopyItem.isAFile && !CurrentCopyItem.isADirectory) {
-        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`
+        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`;
         ApiBase.copyFile(CurrentCopyItem.id, CurrentCopyItem.path, targetPath);
       }
       if(!CurrentCopyItem.isAFile && CurrentCopyItem.isADirectory) {
-        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`
+        const targetPath = `${targetFolder}/${CurrentCopyItem.name}`;
         ApiBase.copyFolder(CurrentCopyItem.id, CurrentCopyItem.path, targetPath);
       }
     }
+    console.log('End of copyAllItems');
   };
 
 	useEffect(() => {
@@ -71,12 +80,36 @@ const CopyPane = (props) => {
 		api.recieve(ComObject.channels.COPY_FILE, (event, arg) => {
       console.log('event: ', event);
       console.log('Copied File: ', arg);
+      // if(copyCollection.length === 0) {
+      //   console.log('copyAllItems in api.recieve for COPY_FILE: ', copyAllItems);
+      //   setCopyAll(false);
+      // }
     });
 
     api.recieve(ComObject.channels.COPY_FOLDER, (event, arg) => {
       console.log('event: ', event);
       console.log('Copied Folder: ', arg);
+      // if(copyCollection.length === 0) {
+      //   console.log('copyAllItems in api.recieve for COPY_FOLDER: ', copyAllItems);
+      //   setCopyAll(false);
+      // }
     });
+
+
+    // if(!copyAll && copyCollection.length === 0) {
+    //   console.log('copyAll is false: ', copyAll);
+    //   console.log('copyAllItems is: ', copyAllItems);
+    //   // setCopyAll(false);
+    //   dispatch(copyAllItemsIsNotActive());
+    // }
+
+    if(copyCollection.length === 0 && copyAll) {
+      console.log('Nothing in copyCollection: ', copyCollection.length);
+      console.log('copyAll: ', copyAll);
+      setCopyAll(false);
+      dispatch(copyAllItemsIsNotActive());
+    }
+
    
     // api.recieve(ComObject.channels.GET_STATUS_OF_COPY, (event, arg) => {
     //   console.log('event: ', event);
@@ -87,7 +120,7 @@ const CopyPane = (props) => {
     return () => {
       
     };
-	}, []);
+	}, [copyAll, copyAllItems, copyCollection.length]);
 
   if(copyCollection.length > 9) {
     FolderContentsSectionStyle.overflowY = 'scroll';
@@ -95,16 +128,38 @@ const CopyPane = (props) => {
     FolderContentsSectionStyle.overflowY = 'auto';
   }
 
+  if(copyAll) {
+    CopyPaneButtonStyle.color = 'black';
+    CopyPaneButtonStyle.backgroundColor = 'red';
+  } else {
+    CopyPaneButtonStyle.color = 'red';
+    CopyPaneButtonStyle.backgroundColor = 'black';
+  }
+
   return (
     <div style={CopyPaneStyle}>
       <h2>Files and Folders to Copy</h2>
       <div style={CopyPaneButtonContainerStyle}>
-      	<Button variant="outlined" onClick={copyAllItems} style={CopyPaneButtonStyle}>Copy All</Button>
-      	<Button variant="outlined" onClick={removeAllItems} style={CopyPaneButtonStyle}>Remove All</Button>
+      	<Button
+          disabled={copyAll}
+          variant="outlined"
+          onClick={copyAllItemsHandler}
+          style={CopyPaneButtonStyle}
+        >
+          Copy All
+        </Button>
+      	<Button
+          disabled={copyAll}
+          variant="outlined"
+          onClick={removeAllItemsHandler}
+          style={CopyPaneButtonStyle}
+        >
+          Remove All
+        </Button>
       </div>
 
       <div style={FolderContentsSectionStyle}>
-        {copyCollection.length > 0 ? copyCollection.map((CurrentItem) => (<CopyItem key={CurrentItem.id} CurrentItem={CurrentItem} />)) : null }
+        {copyCollection.length > 0 ? copyCollection.map((CurrentItem) => (<CopyItem copyAll={copyAll} key={CurrentItem.id} CurrentItem={CurrentItem} />)) : null }
       </div>
     </div>
   );

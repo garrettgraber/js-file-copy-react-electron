@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Tooltip } from 'react-tooltip';
 
 const FolderItem = props => {
+
+	const copyCollection = useSelector((state) => state.copyCollection);
+	const copyAllItems = useSelector((state) => state.copyAllItems);
+
+	const [isInCopyArray, setIsInCopyArray] = useState(false);
 
 	const {
 		CurrentItem,
@@ -27,6 +33,17 @@ const FolderItem = props => {
 	};
 
 	useEffect(() => {
+
+		const itemIsInCopyCollection = copyCollection.some(Item => Item.id === id);
+		if(itemIsInCopyCollection) {
+			setIsInCopyArray(true);
+		} else {
+			setIsInCopyArray(false);
+		}
+
+		if(copyAllItems) {
+			// console.log('Copying Items: ', copyCollection);
+		}
  
     // Clean the listener after the component is dismounted
     return () => {
@@ -34,8 +51,15 @@ const FolderItem = props => {
     };
 	}, []);
 
+	const FolderItemTargetStyle = {};
+	const FolderItemTargetIsCopyingStyle = {
+		backgroundColor: 'red'
+	};
+
+	const TargetCopyItemStyle = isInCopyArray ? FolderItemTargetIsCopyingStyle : FolderItemTargetStyle;
+
 	return (
-		<div>
+		<div style={TargetCopyItemStyle} disabled={isInCopyArray}>
 			<div
 				style={FolderItemStyles}
 				onClick={folderItemClick}

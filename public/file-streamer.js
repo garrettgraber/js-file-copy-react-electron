@@ -194,6 +194,8 @@ const streamFilePromise = (sourceFile, targetFile, win, id) => {
 		    //after that we read the all file piece  by piece we close the stram 
 				console.log('Done reading File');
 		    writeStream.end();
+		    console.log('Done writing File');
+		    resolve(`Done Writing: ${targetFile}`);
 			});
 
 			// readStream.on('end', () => {

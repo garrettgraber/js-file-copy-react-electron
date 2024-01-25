@@ -5,7 +5,9 @@ import {
 	DELETE_COPY_ITEM,
 	EMPTY_COPY_ITEMS,
 	CHANGE_CURRENT_SOURCE_FOLDER,
-	CHANGE_CURRENT_TARGET_FOLDER
+	CHANGE_CURRENT_TARGET_FOLDER,
+	COPY_ALL_ITEMS_IS_ACTIVE,
+	COPY_ALL_ITEMS_IS_NOT_ACTIVE
 } from '../actionTypes/actionTypes.js';
 
 const copyCollection = (state = [], action) => {
@@ -51,11 +53,23 @@ const targetFolder = (state = '', action) => {
 	}
 };
 
+const copyAllItems = (state = false, action) => {
+	switch (action.type) {
+		case COPY_ALL_ITEMS_IS_ACTIVE:
+			return true;
+		case COPY_ALL_ITEMS_IS_NOT_ACTIVE:
+			return false;
+		default:
+			return state;
+	}
+};
+
 
 // export default copyCollection;
 
 export default combineReducers({
 	copyCollection,
 	sourceFolder,
-	targetFolder
+	targetFolder,
+	copyAllItems
 });

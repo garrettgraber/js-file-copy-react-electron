@@ -67,8 +67,8 @@ function App() {
     if(rootFolder === '') {
        // Listen for the event
       api.recieve(ComObject.channels.GET_ROOT_FOLDER, (event, arg) => {
-        console.log('event: ', event);
-        console.log('root folder: ', arg);
+        // console.log('event: ', event);
+        // console.log('root folder: ', arg);
         setRootFolder(arg);
       });
     }
@@ -76,8 +76,8 @@ function App() {
     if(homeFolder === '') {
        // Listen for the event
       api.recieve(ComObject.channels.GET_HOME_FOLDER, (event, arg) => {
-        console.log('event: ', event);
-        console.log('home folder: ', arg);
+        // console.log('event: ', event);
+        // console.log('home folder: ', arg);
         setHomeFolder(arg);
 
         dispatch(changeCurrentSourceFolder(arg));
@@ -88,8 +88,8 @@ function App() {
     if(isArrayEmpty(rootSubFolders)) {
        // Listen for the event
       api.recieve(ComObject.channels.GET_ROOT_SUB_FOLDERS, (event, arg) => {
-        console.log('event: ', event);
-        console.log('root sub folders: ', arg);
+        // console.log('event: ', event);
+        // console.log('root sub folders: ', arg);
         setRootSubFolders(arg);
       });
     }
@@ -97,8 +97,8 @@ function App() {
     if(isArrayEmpty(mediaDrives)) {
        // Listen for the event
       api.recieve(ComObject.channels.GET_MEDIA_DRVIES, (event, arg) => {
-        console.log('event: ', event);
-        console.log('media drives: ', arg);
+        // console.log('event: ', event);
+        // console.log('media drives: ', arg);
         setMediaDrives(arg);
       });
     }

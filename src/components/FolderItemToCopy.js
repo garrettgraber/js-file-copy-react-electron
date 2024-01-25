@@ -30,7 +30,7 @@ const FolderItemToCopy = props => {
 	// console.log('CurrentItem: ', CurrentItem);
 
 	const copyItem = e => {
-		console.log('item to copy: ', e);
+		// console.log('item to copy: ', e);
 		console.log('CurrentItem to copy: ', CurrentItem);
 		dispatch(addCopyItem(CurrentItem));
 	};

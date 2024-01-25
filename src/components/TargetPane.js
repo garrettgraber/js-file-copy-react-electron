@@ -141,27 +141,26 @@ const TargetPane = (props) => {
 	};
 
 	const clickItem = e => {
-		console.log('item clicked: ', e);
-
-		console.log('dataset: ', e.target.dataset);
+		// console.log('item clicked: ', e);
+		// console.log('dataset: ', e.target.dataset);
 
 		const DataSet = e.target.dataset;
 
 		const isAFile = stringToBoolean(DataSet.isafile);
 		const isADirectory = stringToBoolean(DataSet.isadirectory);
 
-		console.log('Target DataSet is file: ', isAFile);
-		console.log('Target DataSet is directory: ', isADirectory);
+		// console.log('Target DataSet is file: ', isAFile);
+		// console.log('Target DataSet is directory: ', isADirectory);
 
 		if(isAFile) {
-			console.log('DataSet is file: ', isAFile);
+			// console.log('DataSet is file: ', isAFile);
 		}
 
 		if(isADirectory && !isAFile) {
-			console.log('data-item: ', e.target.getAttribute('data-name'));
+			// console.log('data-item: ', e.target.getAttribute('data-name'));
 	    const dataItemClicked = e.target.getAttribute('data-name');
 	    const dataItemClickedPath = `${targetFolder}/${dataItemClicked}`;
-	    console.log('targetFolder: ', targetFolder);
+	    // console.log('targetFolder: ', targetFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
 	    dispatch(changeCurrentTargetFolder(dataItemClickedPath));
 	    ApiBase.getTargetFolderContents(dataItemClickedPath);
@@ -169,8 +168,8 @@ const TargetPane = (props) => {
 	};
 
 	const upDirectory = e => {
-		console.log('upDirectory clicked: ', e);
-		console.log('targetFolder: ', targetFolder);
+		// console.log('upDirectory clicked: ', e);
+		// console.log('targetFolder: ', targetFolder);
 		const currentFolderArray = targetFolder.split('/');
 		if(currentFolderArray.length > 2) {
 			currentFolderArray.pop();
@@ -184,15 +183,15 @@ const TargetPane = (props) => {
 	useEffect(() => {
 
     api.recieve(ComObject.channels.GET_TARGET_FOLDER_CONTENTS, (event, arg) => {
-      console.log('event: ', event);
-      console.log('found current target folder contents: ', arg);
+      // console.log('event: ', event);
+      // console.log('found current target folder contents: ', arg);
       setCurrentFolderContents(arg);
     });
 
     api.recieve(ComObject.channels.CREATE_FOLDER, (event, arg) => {
-      console.log('event: ', event);
-      console.log('create folder status: ', arg);
-      console.log('create folder currentFolder: ', arg.currentFolder);
+      // console.log('event: ', event);
+      // console.log('create folder status: ', arg);
+      // console.log('create folder currentFolder: ', arg.currentFolder);
       if(arg.success) {
       	console.log('create folder currentFolder after success: ', arg.currentFolder);
       	dispatch(changeCurrentTargetFolder(arg.currentFolder));
@@ -202,12 +201,12 @@ const TargetPane = (props) => {
 
     if(homeFolder !== '') {
     	setBaseHomeFolder(homeFolder);
-    	console.log('baseHomeFolder: ', baseHomeFolder);
+    	// console.log('baseHomeFolder: ', baseHomeFolder);
     }
 
     if(currentFolderConents.length === 0) {
-    	console.log('currentFolderConents is empty: ', currentFolderConents);
-    	console.log('targetFolder is: ', targetFolder);
+    	// console.log('currentFolderConents is empty: ', currentFolderConents);
+    	// console.log('targetFolder is: ', targetFolder);
     	ApiBase.getTargetFolderContents(targetFolder);
     }
    

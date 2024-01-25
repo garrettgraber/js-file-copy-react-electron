@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Tooltip } from 'react-tooltip';
 import { LinearProgress } from '@mui/material';
+import Button from '@mui/material/Button';
 import { deleteCopyItem } from '../actions/actions.js';
 import ComObject from '../api/COM.js';
 
 const { api } = window;
 
 const CopyItem = props => {
+
 	const dispatch = useDispatch();
 	const {
-		CurrentItem
+		CurrentItem,
+		copyAll
 	} = props;
 
 	const {
@@ -49,10 +52,9 @@ const CopyItem = props => {
 		marginBottom: 10,
 		marginLeft: 10,
 		backgroundColor: '#2f8ca3',
-		borderRadius: 2
+		borderRadius: 2,
+		color: 'black'
 	};
-
-	console.log('CurrentItem: ', CurrentItem);
 
 	const deleteItem = e => {
 		console.log('item to copy: ', e);
@@ -64,16 +66,24 @@ const CopyItem = props => {
 
 		api.recieve(`${ComObject.channels.GET_STATUS_OF_COPY}-${id}`, (event, arg) => {
 			setPercentageDone(arg.percentageDone);
-      console.log(`${arg.percentageDone}%. ${name}`);
+      // console.log(`${arg.percentageDone}%. ${name}`);
       // console.log('event: ', event);
       // console.log('Get Status of Copy: ', arg);
+      if(arg.percentageDone === 100) {
+      	setTimeout(() => {
+      		console.log('Item done: ', id);
+				  dispatch(deleteCopyItem(CurrentItem));
+				}, 10000);
+      }
+
+      
     });
  
     // Clean the listener after the component is dismounted
     return () => {
 
     };
-	}, []);
+	}, [CurrentItem, id, dispatch]);
 
 	return (
 		<div
@@ -84,11 +94,11 @@ const CopyItem = props => {
 			data-isafile={isAFile}
 			data-isadirectory={isADirectory}
 		>
-			<span style={{position: 'absolute', left: 50}}>{percentageDone}&nbsp;&#37;</span>
+			<span style={{position: 'absolute', left: 50}}>{percentageDone.toFixed(2)}&nbsp;&#37;</span>
 
 			<LinearProgress style={{position: 'absolute', left: 50}} size="lg" value={percentageDone} />
 
-			<span style={{}}
+			<span
 				data-tooltip-id={id}
 				data-tooltip-position-strategy={'fixed'}
 				data-tooltip-place={'top-start'}
@@ -99,7 +109,13 @@ const CopyItem = props => {
 			  content={path}
 			  events={['hover']}
 			/>
-			<button style={CopyItemDeleteButtonStyles} onClick={deleteItem}>Delete</button>
+			<Button
+				disabled={copyAll}
+				style={CopyItemDeleteButtonStyles}
+				onClick={deleteItem}
+			>
+				Delete
+			</Button>
 			{/*<input style={{float:'left',marginLeft: 10}} type="checkbox" name="copy"/>
     	<label for="copy">{CurrentItem.name}</label>*/}
 		</div>

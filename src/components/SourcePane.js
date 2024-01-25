@@ -30,7 +30,6 @@ const stringToBoolean = s => {
 const SourcePane = (props) => {
 	const dispatch = useDispatch();
 	const sourceFolder = useSelector((state) => state.sourceFolder);
-	console.log('sourceFolder before props: ', sourceFolder);
 
 	const {
 		paneName,
@@ -89,36 +88,36 @@ const SourcePane = (props) => {
 	const [currentFolderConents, setCurrentFolderContents] = useState([]);
 	const [baseHomeFolder, setBaseHomeFolder] = useState(homeFolder);
 
-	console.log('sourceFolder: ', sourceFolder);
+	// console.log('sourceFolder: ', sourceFolder);
 
 	const choosePath = e => {
-		console.log('choose path: ', e);
-		console.log('sourceFolder: ', sourceFolder);
+		// console.log('choose path: ', e);
+		// console.log('sourceFolder: ', sourceFolder);
 		dispatch(changeCurrentSourceFolder(e.value));
 		// getSourceFolderContents(e.value);
 		ApiBase.getSourceFolderContents(e.value);
 	};
 
 	const clickItem = e => {
-		console.log('item clicked: ', e);
-		console.log('dataset: ', e.target.dataset);
+		// console.log('item clicked: ', e);
+		// console.log('dataset: ', e.target.dataset);
 		const DataSet = e.target.dataset;
 
 		const isAFile = stringToBoolean(DataSet.isafile);
 		const isADirectory = stringToBoolean(DataSet.isadirectory);
 
-		console.log('Source DataSet is file: ', isAFile);
-		console.log('Source DataSet is directory: ', isADirectory);
+		// console.log('Source DataSet is file: ', isAFile);
+		// console.log('Source DataSet is directory: ', isADirectory);
 
 		if(isAFile) {
-			console.log('DataSet is file: ', isAFile);
+			console.log('Items is file: ', DataSet);
 		}
 
 		if(isADirectory && !isAFile) {
-			console.log('data-item: ', e.target.getAttribute('data-name'));
+			// console.log('data-item: ', e.target.getAttribute('data-name'));
 	    const dataItemClicked = e.target.getAttribute('data-name');
 	    const dataItemClickedPath = `${sourceFolder}/${dataItemClicked}`;
-	    console.log('sourceFolder: ', sourceFolder);
+	    // console.log('sourceFolder: ', sourceFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
 	    dispatch(changeCurrentSourceFolder(dataItemClickedPath));
 	    ApiBase.getSourceFolderContents(dataItemClickedPath);
@@ -126,8 +125,8 @@ const SourcePane = (props) => {
 	};
 
 	const upDirectory = e => {
-		console.log('upDirectory clicked: ', e);
-		console.log('sourceFolder: ', sourceFolder);
+		// console.log('upDirectory clicked: ', e);
+		// console.log('sourceFolder: ', sourceFolder);
 		const currentFolderArray = sourceFolder.split('/');
 		if(currentFolderArray.length > 2) {
 			currentFolderArray.pop();
@@ -141,19 +140,19 @@ const SourcePane = (props) => {
 	useEffect(() => {
 
     api.recieve(ComObject.channels.GET_SOURCE_FOLDER_CONTENTS, (event, arg) => {
-      console.log('event: ', event);
-      console.log('found current source folder contents: ', arg);
+      // console.log('event: ', event);
+      // console.log('found current source folder contents: ', arg);
       setCurrentFolderContents(arg);
     });
 
     if(homeFolder !== '') {
     	setBaseHomeFolder(homeFolder);
-    	console.log('baseHomeFolder: ', baseHomeFolder);
+    	// console.log('baseHomeFolder: ', baseHomeFolder);
     }
 
     if(currentFolderConents.length === 0) {
-    	console.log('currentFolderConents is empty: ', currentFolderConents);
-    	console.log('sourceFolder is: ', sourceFolder);
+    	// console.log('currentFolderConents is empty: ', currentFolderConents);
+    	// console.log('sourceFolder is: ', sourceFolder);
     	ApiBase.getSourceFolderContents(sourceFolder);
     }
    
