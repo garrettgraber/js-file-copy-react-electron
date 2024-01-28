@@ -94,7 +94,7 @@ const CopyItem = props => {
 			data-isafile={isAFile}
 			data-isadirectory={isADirectory}
 		>
-			<span style={{position: 'absolute', left: 50}}>{percentageDone.toFixed(2)}&nbsp;&#37;</span>
+			<span style={{position: 'absolute', left: 50}}>{isAFile ? `${percentageDone.toFixed(2)} %` : ''}</span>
 
 			<LinearProgress style={{position: 'absolute', left: 50}} size="lg" value={percentageDone} />
 

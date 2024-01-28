@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { promisify } = require('util');
+const fastFolderSize = require('fast-folder-size');
+const fastFolderSizeAsync = promisify(fastFolderSize);
+
 
 const {
 	streamFile,
@@ -18,6 +22,7 @@ class Folder {
 		const folderContents = fs.readdirSync(folderPath);
 		const subFolders = folderContents.filter(folderFilter);
 		const filesInFolder = folderContents.filter(fileFilter);
+		this.id = id;
 		this.win = win;
 		this.folderName = folderName;
 		this.parentFolderName = parentFolderName;
@@ -25,6 +30,8 @@ class Folder {
 		this.folders = subFolders;
 		this.files = filesInFolder;
 		this.subFoldersObjectsArray = [];
+
+
 	}
 
 	printData() {
@@ -36,17 +43,29 @@ class Folder {
 		console.log('subFoldersObjectsArray: ', this.subFoldersObjectsArray);
 	}
 
-	treeSearch() {
+	async treeSearch() {
 		const folderPath = this.folderPath;
+		const folderSizeInBytes = await fastFolderSizeAsync(folderPath);
+		this.sizeInBytes = folderSizeInBytes;
+		console.log('Size in Bytes: ', this.sizeInBytes);
 		const subFoldersObjectsArray = this.subFoldersObjectsArray;
 		const _win = this.win;
-		this.folders.forEach((el, index, arr) => {
-			const subFolderPath = path.join(folderPath, el);
+
+		for(const currentFolder of this.folders) {
+			const subFolderPath = path.join(folderPath, currentFolder);
 			const SubFolder = new Folder(subFolderPath, _win, uuidv4());
 			subFoldersObjectsArray.push(SubFolder);
-			SubFolder.treeSearch();
-			// SubFolder.printData();
-		});
+			await SubFolder.treeSearch();
+		}
+
+
+		// this.folders.forEach((el, index, arr) => {
+		// 	const subFolderPath = path.join(folderPath, el);
+		// 	const SubFolder = new Folder(subFolderPath, _win, uuidv4());
+		// 	subFoldersObjectsArray.push(SubFolder);
+		// 	await SubFolder.treeSearch();
+		// 	// SubFolder.printData();
+		// });
 	}
 
 	createSubFoldersAndCopy(targetPath) {

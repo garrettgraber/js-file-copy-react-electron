@@ -2,6 +2,8 @@ import { useState, useEffect, React } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 // import { v4 as uuidv4 } from 'uuid';
 import Button from '@mui/material/Button';
+import _ from 'lodash';
+
 
 import {
   emptyCopyItems,
@@ -75,6 +77,38 @@ const CopyPane = (props) => {
     console.log('End of copyAllItems');
   };
 
+  const copyAllItemsSequentialHandler = e => {
+    setCopyAll(true);
+    dispatch(copyAllItemsIsActive());
+    const copyCollectionCloneFiles = [];
+    const copyCollectionCloneFolders = [];
+    const copyCollectionCloneDeep = _.cloneDeep(copyCollection);
+    for(const CurrentCopyItem of copyCollectionCloneDeep) {
+      if(CurrentCopyItem.isAFile && !CurrentCopyItem.isADirectory) {
+        const targetFilePath = `${targetFolder}/${CurrentCopyItem.name}`;
+        CurrentCopyItem['targetFilePath'] = targetFilePath;
+        CurrentCopyItem['sourceFilePath'] = CurrentCopyItem.path;
+        copyCollectionCloneFiles.push(CurrentCopyItem);
+      }
+      if(!CurrentCopyItem.isAFile && CurrentCopyItem.isADirectory) {
+        const targetFolderPath = `${targetFolder}/${CurrentCopyItem.name}`;
+        CurrentCopyItem['targetFolderPath'] = targetFolderPath;
+        CurrentCopyItem['sourceFolderPath'] = CurrentCopyItem.path;
+        copyCollectionCloneFolders.push(CurrentCopyItem);
+      }
+    }
+    console.log('copyCollectionCloneFiles: ', copyCollectionCloneFiles);
+    console.log('copyCollectionCloneFolders: ', copyCollectionCloneFolders);
+    console.log('copyCollectionCloneDeep: ', copyCollectionCloneDeep);
+    if(copyCollectionCloneFiles.length > 0) {
+      ApiBase.copyFiles(copyCollectionCloneFiles);
+    }
+    if(copyCollectionCloneFolders.length > 0) {
+      ApiBase.copyFolders(copyCollectionCloneFolders);
+    }
+    console.log('End of copyAllItems');
+  };
+
 	useEffect(() => {
 
 		api.recieve(ComObject.channels.COPY_FILE, (event, arg) => {
@@ -86,9 +120,27 @@ const CopyPane = (props) => {
       // }
     });
 
+    api.recieve(ComObject.channels.COPY_FILES, (event, arg) => {
+      console.log('event: ', event);
+      console.log('Copied Files: ', arg);
+      // if(copyCollection.length === 0) {
+      //   console.log('copyAllItems in api.recieve for COPY_FILE: ', copyAllItems);
+      //   setCopyAll(false);
+      // }
+    });
+
     api.recieve(ComObject.channels.COPY_FOLDER, (event, arg) => {
       console.log('event: ', event);
       console.log('Copied Folder: ', arg);
+      // if(copyCollection.length === 0) {
+      //   console.log('copyAllItems in api.recieve for COPY_FOLDER: ', copyAllItems);
+      //   setCopyAll(false);
+      // }
+    });
+
+    api.recieve(ComObject.channels.COPY_FOLDERS, (event, arg) => {
+      console.log('event: ', event);
+      console.log('Copied Folders: ', arg);
       // if(copyCollection.length === 0) {
       //   console.log('copyAllItems in api.recieve for COPY_FOLDER: ', copyAllItems);
       //   setCopyAll(false);
@@ -143,7 +195,7 @@ const CopyPane = (props) => {
       	<Button
           disabled={copyAll}
           variant="outlined"
-          onClick={copyAllItemsHandler}
+          onClick={copyAllItemsSequentialHandler}
           style={CopyPaneButtonStyle}
         >
           Copy All

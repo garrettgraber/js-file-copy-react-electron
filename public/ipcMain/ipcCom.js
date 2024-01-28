@@ -113,8 +113,10 @@ const ComObject = {
     GET_SOURCE_FOLDER_CONTENTS: 'get_source_folder_contents',
     GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
     CREATE_FOLDER: 'create_folder',
+    COPY_FILES: 'copy_files',
     COPY_FILE: 'copy_file',
-    COPY_FOLDER: 'copy_folder'
+    COPY_FOLDER: 'copy_folder',
+    COPY_FOLDERS: 'copy_folders'
   },
 };
 
@@ -239,8 +241,27 @@ const ipcCopyFile = (win) => {
 			console.log('response: ', response);
 			event.sender.send(ComObject.channels.COPY_FILE, {success: true, response});
 		} catch (error) {
-	    console.error(`Could not get products: ${error}`);
+	    console.error(`Could copy file: ${error}`);
 	    event.sender.send(ComObject.channels.COPY_FILE, {success: false, error});
+	  }
+	});
+};
+const ipcCopyFiles = (win) => {
+	ipcMain.on(ComObject.channels.COPY_FILES, async (event, arg) => {
+		try {
+			console.log('Files to Copy: ', arg);
+			const files = arg;
+			const fileNames = [];
+			for(const currentFile of files) {
+				const { sourceFilePath, targetFilePath, id } = currentFile;
+				const response = await streamFilePromise(sourceFilePath, targetFilePath, win, id);
+				console.log('targetFilePath: ', targetFilePath);
+				fileNames.push(targetFilePath);
+			}
+			event.sender.send(ComObject.channels.COPY_FILES, {success: true, fileNames});
+		} catch (error) {
+	    console.error(`Could not copy files: ${error}`);
+	    event.sender.send(ComObject.channels.COPY_FILES, {success: false, error});
 	  }
 	});
 };
@@ -250,10 +271,31 @@ const ipcCopyFolder = (win) => {
 			console.log('Folder to Copy: ', arg);
 			const { sourceFolderPath, targetFolderPath, id } = arg;
 			const FolderToCopy = new Folder(sourceFolderPath, win, id);
-			FolderToCopy.treeSearch();
+			await FolderToCopy.treeSearch();
 			const response = await FolderToCopy.createSubFoldersAndCopyAsync(targetFolderPath);
 			console.log('response: ', response);
 			event.sender.send(ComObject.channels.COPY_FOLDER, response);
+		} catch (error) {
+	    console.error(`Could not copy folder: ${error}`);
+	    event.sender.send(ComObject.channels.COPY_FOLDER, {success: false, error});
+	  }
+	});
+};
+const ipcCopyFolders = (win) => {
+	ipcMain.on(ComObject.channels.COPY_FOLDERS, async (event, arg) => {
+		try {
+			console.log('Folder to Copy: ', arg);
+			const folders = arg;
+			const folderNames = [];
+			for(const currentFolder of folders) {
+				const { sourceFolderPath, targetFolderPath, id } = currentFolder;
+				const FolderToCopy = new Folder(sourceFolderPath, win, id);
+				FolderToCopy.treeSearch();
+				const response = await FolderToCopy.createSubFoldersAndCopyAsync(targetFolderPath);
+				console.log('targetFolderPath: ', targetFolderPath);
+				folderNames.push(targetFolderPath);
+			}
+			event.sender.send(ComObject.channels.COPY_FOLDERS, folderNames);
 		} catch (error) {
 	    console.error(`Could not get products: ${error}`);
 	    event.sender.send(ComObject.channels.COPY_FOLDER, {success: false, error});
@@ -307,7 +349,9 @@ class IpcCom {
   	ipcGetCurrentFolderContents();
   	ipcCreateFolder();
   	ipcCopyFile(_win);
+  	ipcCopyFiles(_win);
   	ipcCopyFolder(_win);
+  	ipcCopyFolders(_win);
 
 		// ipcMain.on(ComObject.channels.GET_ROOT_FOLDER, (event, arg) => {
 		//   console.log(arg);

@@ -11,7 +11,9 @@ const ComObject = {
     GET_TARGET_FOLDER_CONTENTS: 'get_target_folder_contents',
     CREATE_FOLDER: 'create_folder',
     COPY_FILE: 'copy_file',
+    COPY_FILES: 'copy_files',
     COPY_FOLDER: 'copy_folder',
+    COPY_FOLDERS: 'copy_folders',
     GET_STATUS_OF_COPY: 'get_status_of_copy'
   },
 };
