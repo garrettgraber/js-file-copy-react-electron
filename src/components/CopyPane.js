@@ -188,6 +188,14 @@ const CopyPane = (props) => {
     CopyPaneButtonStyle.backgroundColor = 'black';
   }
 
+  const copyItemTypeFilter = CopyItemToFilter => {
+    if(CopyItemToFilter.isAFile) {
+      return (<CopyItem copyAll={copyAll} key={CopyItemToFilter.id} CurrentItem={CopyItemToFilter} />);
+    } else if(CopyItemToFilter.isADirectory) {
+      return null;
+    }
+  };
+
   return (
     <div style={CopyPaneStyle}>
       <h2>Files and Folders to Copy</h2>

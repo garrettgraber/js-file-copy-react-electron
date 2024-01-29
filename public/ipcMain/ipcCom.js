@@ -290,7 +290,7 @@ const ipcCopyFolders = (win) => {
 			for(const currentFolder of folders) {
 				const { sourceFolderPath, targetFolderPath, id } = currentFolder;
 				const FolderToCopy = new Folder(sourceFolderPath, win, id);
-				FolderToCopy.treeSearch();
+				await FolderToCopy.treeSearch();
 				const response = await FolderToCopy.createSubFoldersAndCopyAsync(targetFolderPath);
 				console.log('targetFolderPath: ', targetFolderPath);
 				folderNames.push(targetFolderPath);

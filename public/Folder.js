@@ -14,6 +14,14 @@ const {
 const folderFilter = n => n.split('.').length === 1;
 const fileFilter = n => n.split('.').length !== 1;
 
+class File {
+	constructor(filePath, id, size) {
+		this.filePath = filePath;
+		this.id = id;
+		this.size = size;
+	}
+}
+
 class Folder {
 	constructor(folderPath, win, id) {
 		const folderPathSplit = folderPath.split('/');
@@ -30,8 +38,7 @@ class Folder {
 		this.folders = subFolders;
 		this.files = filesInFolder;
 		this.subFoldersObjectsArray = [];
-
-
+		this.fileObjectsArray = [];
 	}
 
 	printData() {
@@ -41,6 +48,7 @@ class Folder {
 		console.log('folders: ', this.folders);
 		console.log('files: ', this.files);
 		console.log('subFoldersObjectsArray: ', this.subFoldersObjectsArray);
+		console.log('fileObjectsArray: ', this.fileObjectsArray);
 	}
 
 	async treeSearch() {
@@ -50,6 +58,15 @@ class Folder {
 		console.log('Size in Bytes: ', this.sizeInBytes);
 		const subFoldersObjectsArray = this.subFoldersObjectsArray;
 		const _win = this.win;
+		const fileObjectsArray = this.fileObjectsArray;
+
+		for(const currentFile of this.files) {
+			const currentFilePath = path.join(folderPath, currentFile);
+			const fileInfo = fs.statSync(currentFilePath);
+			const fileSize = fileInfo.size;
+			const NewFileObject = new File(currentFilePath, uuidv4(), fileSize);
+			fileObjectsArray.push(NewFileObject);
+		}
 
 		for(const currentFolder of this.folders) {
 			const subFolderPath = path.join(folderPath, currentFolder);
