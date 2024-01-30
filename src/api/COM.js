@@ -14,6 +14,7 @@ const ComObject = {
     COPY_FILES: 'copy_files',
     COPY_FOLDER: 'copy_folder',
     COPY_FOLDERS: 'copy_folders',
+    FOLDER_TREE: 'folder_tree'
     GET_STATUS_OF_COPY: 'get_status_of_copy'
   },
 };

@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 
 import { addCopyItem } from '../actions/actions.js';
 
-const FolderItemToCopy = props => {
+const SourceItemToCopy = props => {
 	const dispatch = useDispatch();
 	const {
 		CurrentItem,
@@ -74,4 +74,4 @@ const FolderItemToCopy = props => {
 };
 
 
-export default FolderItemToCopy;
+export default SourceItemToCopy;

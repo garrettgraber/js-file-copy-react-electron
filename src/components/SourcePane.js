@@ -11,7 +11,7 @@ import { changeCurrentSourceFolder } from '../actions/actions.js';
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
 
-import FolderItemToCopy from './FolderItemToCopy.js';
+import SourceItemToCopy from './SourceItemToCopy.js';
 
 const { api } = window;
 
@@ -179,7 +179,7 @@ const SourcePane = (props) => {
     		<Button variant="outlined" style={UpDirectoryButtonStyle} onClick={upDirectory}>&#8593;</Button>
     	</div>
     	<div style={FolderContentsSectionStyle}>
-	    	{currentFolderConents.length > 0 ? currentFolderConents.map((CurrentItem) => (<FolderItemToCopy key={uuidv4()} CurrentItem={CurrentItem} folderItemClick={clickItem} />)) : null }
+	    	{currentFolderConents.length > 0 ? currentFolderConents.map((CurrentItem) => (<SourceItemToCopy key={uuidv4()} CurrentItem={CurrentItem} folderItemClick={clickItem} />)) : null }
     	</div>
     </div>
   );

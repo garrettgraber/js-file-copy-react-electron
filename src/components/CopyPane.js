@@ -12,7 +12,9 @@ import {
 } from '../actions/actions.js';
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
-import CopyItem from './CopyItem.js';
+import FileCopyItem from './FileCopyItem.js';
+import FolderCopyItem from './FolderCopyItem.js';
+
 
 const { api } = window;
 
@@ -190,9 +192,9 @@ const CopyPane = (props) => {
 
   const copyItemTypeFilter = CopyItemToFilter => {
     if(CopyItemToFilter.isAFile) {
-      return (<CopyItem copyAll={copyAll} key={CopyItemToFilter.id} CurrentItem={CopyItemToFilter} />);
+      return (<FileCopyItem copyAll={copyAll} key={CopyItemToFilter.id} CurrentItem={CopyItemToFilter} />);
     } else if(CopyItemToFilter.isADirectory) {
-      return null;
+      return (<FolderCopyItem copyAll={copyAll} key={CopyItemToFilter.id} CurrentItem={CopyItemToFilter} />);;
     }
   };
 
@@ -219,7 +221,7 @@ const CopyPane = (props) => {
       </div>
 
       <div style={FolderContentsSectionStyle}>
-        {copyCollection.length > 0 ? copyCollection.map((CurrentItem) => (<CopyItem copyAll={copyAll} key={CurrentItem.id} CurrentItem={CurrentItem} />)) : null }
+        {copyCollection.length > 0 ? copyCollection.map((CurrentItem) => (<FileCopyItem copyAll={copyAll} key={CurrentItem.id} CurrentItem={CurrentItem} />)) : null }
       </div>
     </div>
   );

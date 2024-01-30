@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Tooltip } from 'react-tooltip';
 
-const FolderItem = props => {
+const TargetItem = props => {
 
 	const copyCollection = useSelector((state) => state.copyCollection);
 	const copyAllItems = useSelector((state) => state.copyAllItems);
@@ -84,4 +84,4 @@ const FolderItem = props => {
 };
 
 
-export default FolderItem;
+export default TargetItem;

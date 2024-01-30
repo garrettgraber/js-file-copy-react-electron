@@ -5,6 +5,8 @@ import { LinearProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import { deleteCopyItem } from '../actions/actions.js';
 import ComObject from '../api/COM.js';
+import ApiBase from '../api/apiBase.js';
+
 
 const { api } = window;
 
@@ -25,6 +27,8 @@ const FolderCopyItem = props => {
 	} = CurrentItem;
 
 	const [percentageDone, setPercentageDone] = useState(0);
+
+	ApiBase.folderTree(path, id);
 
 	const CopyItemStyles = {
 		border: '1px solid #0FFF50',
@@ -56,27 +60,10 @@ const FolderCopyItem = props => {
 		color: 'black'
 	};
 
-	const deleteItem = e => {
-		console.log('item to copy: ', e);
-		console.log('CurrentItem to copy: ', CurrentItem);
-		dispatch(deleteCopyItem(CurrentItem));
-	};
-
 	useEffect(() => {
 
-		api.recieve(`${ComObject.channels.GET_STATUS_OF_COPY}-${id}`, (event, arg) => {
-			setPercentageDone(arg.percentageDone);
-      // console.log(`${arg.percentageDone}%. ${name}`);
-      // console.log('event: ', event);
-      // console.log('Get Status of Copy: ', arg);
-      if(arg.percentageDone === 100) {
-      	setTimeout(() => {
-      		console.log('Item done: ', id);
-				  dispatch(deleteCopyItem(CurrentItem));
-				}, 10000);
-      }
-
-      
+    api.recieve(ComObject.channels.FOLDER_TREE, (event, arg) => {
+    	console.log('Folder Tree: ', arg);
     });
  
     // Clean the listener after the component is dismounted

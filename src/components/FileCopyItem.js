@@ -8,7 +8,7 @@ import ComObject from '../api/COM.js';
 
 const { api } = window;
 
-const CopyItem = props => {
+const FileCopyItem = props => {
 
 	const dispatch = useDispatch();
 	const {
@@ -124,4 +124,4 @@ const CopyItem = props => {
 };
 
 
-export default CopyItem;
+export default FileCopyItem;

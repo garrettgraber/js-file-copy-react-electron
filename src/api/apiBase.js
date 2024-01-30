@@ -36,6 +36,9 @@ const copyFiles = copyFilesArray => {
 const copyFolders = copyFoldersArray => {
 	api.send(ComObject.channels.COPY_FOLDERS, copyFoldersArray);
 };
+const folderTree = (sourceFolderPath, id) => {
+	api.send(ComObject.channels.FOLDER_TREE, {sourceFolderPath, id});
+};
 
 const ApiBase = {
 	getRootFolder,
@@ -48,7 +51,8 @@ const ApiBase = {
 	copyFile,
 	copyFiles,
 	copyFolder,
-	copyFolders
+	copyFolders,
+	folderTree
 };
 
 export default ApiBase;

@@ -14,7 +14,7 @@ import { changeCurrentTargetFolder } from '../actions/actions.js';
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
 
-import FolderItem from './FolderItem.js';
+import TargetItem from './TargetItem.js';
 
 const { api } = window;
 
@@ -261,7 +261,7 @@ const TargetPane = (props) => {
     	</div>
     	<div style={FolderContentsSectionStyle}>
 
-	    	{currentFolderConents.length > 0 ? currentFolderConents.map((CurrentItem) => (<FolderItem key={uuidv4()} CurrentItem={CurrentItem} folderItemClick={clickItem} />)) : null }
+	    	{currentFolderConents.length > 0 ? currentFolderConents.map((CurrentItem) => (<TargetItem key={uuidv4()} CurrentItem={CurrentItem} folderItemClick={clickItem} />)) : null }
     	</div>
 
     </div>
