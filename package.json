@@ -7,6 +7,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/lab": "^5.0.0-alpha.161",
     "@mui/material": "^5.15.5",
+    "@preact/signals-react": "^2.0.0",
     "@reduxjs/toolkit": "^2.0.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
