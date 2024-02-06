@@ -4,6 +4,10 @@ import { Tooltip } from 'react-tooltip';
 import { LinearProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import { deleteCopyItem } from '../actions/actions.js';
+
+import { deleteItemFromCopyCollectionUsed } from '../signals/copyCollectionUsed.js';
+
+
 import ComObject from '../api/COM.js';
 
 const { api } = window;
@@ -59,6 +63,8 @@ const FileCopyItem = props => {
 	const deleteItem = e => {
 		console.log('item to copy: ', e);
 		console.log('CurrentItem to copy: ', CurrentItem);
+		const deleteItemFromCopyCollectionUsedResult = deleteItemFromCopyCollectionUsed(CurrentItem);
+		console.log(deleteItemFromCopyCollectionUsedResult);
 		dispatch(deleteCopyItem(CurrentItem));
 	};
 
@@ -72,6 +78,8 @@ const FileCopyItem = props => {
       if(arg.percentageDone === 100) {
       	setTimeout(() => {
       		console.log('Item done: ', id);
+      		const deleteItemFromCopyCollectionUsedResult = deleteItemFromCopyCollectionUsed(CurrentItem);
+					console.log(deleteItemFromCopyCollectionUsedResult);
 				  dispatch(deleteCopyItem(CurrentItem));
 				}, 10000);
       }

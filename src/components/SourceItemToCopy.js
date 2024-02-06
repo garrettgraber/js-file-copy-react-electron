@@ -5,6 +5,9 @@ import Button from '@mui/material/Button';
 
 import { addCopyItem } from '../actions/actions.js';
 
+import { addToCopyCollectionUsed } from '../signals/copyCollectionUsed.js';
+
+
 const SourceItemToCopy = props => {
 	const dispatch = useDispatch();
 	const {
@@ -32,6 +35,8 @@ const SourceItemToCopy = props => {
 	const copyItem = e => {
 		// console.log('item to copy: ', e);
 		console.log('CurrentItem to copy: ', CurrentItem);
+		const addToCopyCollectionUsedResult = addToCopyCollectionUsed(CurrentItem);
+		console.log(addToCopyCollectionUsedResult);
 		dispatch(addCopyItem(CurrentItem));
 	};
 

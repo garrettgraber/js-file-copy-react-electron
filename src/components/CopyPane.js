@@ -1,8 +1,21 @@
 import { useState, useEffect, React } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { signal, effect } from "@preact/signals-react";
 // import { v4 as uuidv4 } from 'uuid';
 import Button from '@mui/material/Button';
 import _ from 'lodash';
+
+import {
+  copyCollectionUsed,
+  copyCollectionUsedValue,
+  emptyCopyCollectionUsed
+} from '../signals/copyCollectionUsed.js';
+
+
+import {
+  targetFolderUsedValue
+} from '../signals/targetFolderUsed.js';
+
 
 
 import {
@@ -18,10 +31,17 @@ import FolderCopyItem from './FolderCopyItem.js';
 
 const { api } = window;
 
+const count = signal(0);
+
 const CopyPane = (props) => {
 	// console.log('props: ', props);
 	const copyCollection = useSelector((state) => state.copyCollection);
-  const targetFolder = useSelector((state) => state.targetFolder);
+  // let copyCollection = copyCollectionUsedValue;
+
+  // const targetFolder = useSelector((state) => state.targetFolder);
+  let targetFolder = targetFolderUsedValue;
+
+
   const copyAllItems = useSelector((state) => state.copyAllItems);
 
 	const dispatch = useDispatch();
@@ -59,7 +79,16 @@ const CopyPane = (props) => {
     marginTop: 10
   };
 
+  const countIncrease = e => {
+    count.value += 1;
+    console.log(`count.value: ${count.value}`);
+  };
+
   const removeAllItemsHandler = e => {
+    effect(() => {
+      const emptyCopyCollectionResult = emptyCopyCollectionUsed();
+      console.log(emptyCopyCollectionResult);
+    });
   	dispatch(emptyCopyItems());
   };
 
@@ -174,7 +203,7 @@ const CopyPane = (props) => {
     return () => {
       
     };
-	}, [copyAll, copyAllItems, copyCollection.length]);
+	}, [copyAll, copyAllItems, copyCollection, copyCollection.length]);
 
   if(copyCollection.length > 9) {
     FolderContentsSectionStyle.overflowY = 'scroll';
@@ -209,6 +238,13 @@ const CopyPane = (props) => {
           style={CopyPaneButtonStyle}
         >
           Copy All
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={countIncrease}
+          style={CopyPaneButtonStyle}
+        >
+          Signal Test
         </Button>
       	<Button
           disabled={copyAll}

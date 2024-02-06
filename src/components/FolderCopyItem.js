@@ -60,6 +60,8 @@ const FolderCopyItem = props => {
 		color: 'black'
 	};
 
+	const deleteItem = e => {};
+
 	useEffect(() => {
 
     api.recieve(ComObject.channels.FOLDER_TREE, (event, arg) => {

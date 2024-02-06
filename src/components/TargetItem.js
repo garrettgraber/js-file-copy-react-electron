@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Tooltip } from 'react-tooltip';
+import { signal, effect } from "@preact/signals-react";
+
+
+import { copyCollectionUsedValue } from '../signals/copyCollectionUsed.js';
+
+
 
 const TargetItem = props => {
 
 	const copyCollection = useSelector((state) => state.copyCollection);
+	// let copyCollection = copyCollectionUsedValue;
+	
 	const copyAllItems = useSelector((state) => state.copyAllItems);
 
 	const [isInCopyArray, setIsInCopyArray] = useState(false);

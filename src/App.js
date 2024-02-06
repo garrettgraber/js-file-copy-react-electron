@@ -7,6 +7,18 @@ import { ThemeProvider, createTheme, ThemeOptions, styled } from '@mui/material/
 
 import { changeCurrentSourceFolder, changeCurrentTargetFolder } from './actions/actions.js';
 
+import { copyCollectionUsed } from './signals/copyCollectionUsed.js';
+
+import {
+  sourceFolderUsed,
+  changeCurrentSourceFolderUsed,
+} from './signals/sourceFolderUsed.js';
+
+import {
+  targetFolderUsed,
+  changeCurrentTargetFolderUsed
+} from './signals/targetFolderUsed.js';
+
 
 import ComObject from './api/COM.js';
 import ApiBase from './api/apiBase.js';
@@ -78,6 +90,13 @@ function App() {
       api.recieve(ComObject.channels.GET_HOME_FOLDER, (event, arg) => {
         // console.log('event: ', event);
         // console.log('home folder: ', arg);
+
+        const changeCurrentSourceFolderUsedResult = changeCurrentSourceFolderUsed(arg);
+        console.log(changeCurrentSourceFolderUsedResult);
+
+        const changeCurrentTargetFolderUsedResult = changeCurrentTargetFolderUsed(arg);
+        console.log(changeCurrentTargetFolderUsedResult);
+
         setHomeFolder(arg);
 
         dispatch(changeCurrentSourceFolder(arg));

@@ -11,6 +11,12 @@ import 'react-dropdown/style.css';
 
 import { changeCurrentTargetFolder } from '../actions/actions.js';
 
+import {
+	targetFolderUsedValue,
+	changeCurrentTargetFolderUsed
+} from '../signals/targetFolderUsed.js';
+
+
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
 
@@ -32,7 +38,8 @@ const stringToBoolean = s => {
 const TargetPane = (props) => {
 	// console.log('props: ', props);
 	const dispatch = useDispatch();
-	const targetFolder = useSelector((state) => state.targetFolder);
+	// const targetFolder = useSelector((state) => state.targetFolder);
+	let targetFolder = targetFolderUsedValue;
 
 	const {
 		paneName,
@@ -135,6 +142,10 @@ const TargetPane = (props) => {
 	const choosePath = e => {
 		console.log('choose path: ', e);
 		console.log('targetFolder: ', targetFolder);
+
+		const changeCurrentTargetFolderUsedResult = changeCurrentTargetFolderUsed(e.value);
+		console.log(changeCurrentTargetFolderUsedResult);
+
 		dispatch(changeCurrentTargetFolder(e.value));
 		// getTargetFolderContents(e.value);
 		ApiBase.getTargetFolderContents(e.value);
@@ -162,6 +173,10 @@ const TargetPane = (props) => {
 	    const dataItemClickedPath = `${targetFolder}/${dataItemClicked}`;
 	    // console.log('targetFolder: ', targetFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
+
+	    const changeCurrentTargetFolderUsedResult = changeCurrentTargetFolderUsed(dataItemClickedPath);
+			console.log(changeCurrentTargetFolderUsedResult);
+
 	    dispatch(changeCurrentTargetFolder(dataItemClickedPath));
 	    ApiBase.getTargetFolderContents(dataItemClickedPath);
 		}
@@ -175,6 +190,10 @@ const TargetPane = (props) => {
 			currentFolderArray.pop();
 			const newCurrentFolderPath = currentFolderArray.join('/')
 			console.log('newCurrentFolderPath: ', newCurrentFolderPath);
+
+			const changeCurrentTargetFolderUsedResult = changeCurrentTargetFolderUsed(newCurrentFolderPath);
+			console.log(changeCurrentTargetFolderUsedResult);
+
 			dispatch(changeCurrentTargetFolder(newCurrentFolderPath));
 	    ApiBase.getTargetFolderContents(newCurrentFolderPath);
 		}
@@ -194,6 +213,11 @@ const TargetPane = (props) => {
       // console.log('create folder currentFolder: ', arg.currentFolder);
       if(arg.success) {
       	console.log('create folder currentFolder after success: ', arg.currentFolder);
+
+      	const changeCurrentTargetFolderUsedResult = changeCurrentTargetFolderUsed(arg.currentFolder);
+				console.log(changeCurrentTargetFolderUsedResult);
+
+
       	dispatch(changeCurrentTargetFolder(arg.currentFolder));
       	ApiBase.getTargetFolderContents(arg.currentFolder);
       }

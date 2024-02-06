@@ -8,6 +8,12 @@ import 'react-dropdown/style.css';
 
 import { changeCurrentSourceFolder } from '../actions/actions.js';
 
+import {
+	sourceFolderUsedValue,
+	changeCurrentSourceFolderUsed
+} from '../signals/sourceFolderUsed.js';
+
+
 import ComObject from '../api/COM.js';
 import ApiBase from '../api/apiBase.js';
 
@@ -29,7 +35,8 @@ const stringToBoolean = s => {
 
 const SourcePane = (props) => {
 	const dispatch = useDispatch();
-	const sourceFolder = useSelector((state) => state.sourceFolder);
+	// const sourceFolder = useSelector((state) => state.sourceFolder);
+	let sourceFolder = sourceFolderUsedValue;
 
 	const {
 		paneName,
@@ -93,6 +100,9 @@ const SourcePane = (props) => {
 	const choosePath = e => {
 		// console.log('choose path: ', e);
 		// console.log('sourceFolder: ', sourceFolder);
+		const changeCurrentSourceFolderUsedResult = changeCurrentSourceFolderUsed(e.value);
+		console.log(changeCurrentSourceFolderUsedResult);
+
 		dispatch(changeCurrentSourceFolder(e.value));
 		// getSourceFolderContents(e.value);
 		ApiBase.getSourceFolderContents(e.value);
@@ -119,6 +129,9 @@ const SourcePane = (props) => {
 	    const dataItemClickedPath = `${sourceFolder}/${dataItemClicked}`;
 	    // console.log('sourceFolder: ', sourceFolder);
 	    console.log('dataItemClickedPath: ', dataItemClickedPath);
+	    const changeCurrentSourceFolderUsedResult = changeCurrentSourceFolderUsed(dataItemClickedPath);
+			console.log(changeCurrentSourceFolderUsedResult);
+
 	    dispatch(changeCurrentSourceFolder(dataItemClickedPath));
 	    ApiBase.getSourceFolderContents(dataItemClickedPath);
 		}
@@ -130,8 +143,10 @@ const SourcePane = (props) => {
 		const currentFolderArray = sourceFolder.split('/');
 		if(currentFolderArray.length > 2) {
 			currentFolderArray.pop();
-			const newCurrentFolderPath = currentFolderArray.join('/')
+			const newCurrentFolderPath = currentFolderArray.join('/');
 			console.log('newCurrentFolderPath: ', newCurrentFolderPath);
+			const changeCurrentSourceFolderUsedResult = changeCurrentSourceFolderUsed(newCurrentFolderPath);
+			console.log(changeCurrentSourceFolderUsedResult);
 			dispatch(changeCurrentSourceFolder(newCurrentFolderPath));
 	    ApiBase.getSourceFolderContents(newCurrentFolderPath);
 		}
